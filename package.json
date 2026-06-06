@@ -1,0 +1,37 @@
+{
+  "name": "trustci",
+  "version": "0.1.0",
+  "description": "Bulk-register npm Trusted Publishers (npm trust) across all public packages in a monorepo. Supports GitHub, GitLab and CircleCI.",
+  "type": "module",
+  "bin": {
+    "trustci": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "scripts": {
+    "build": "bun build src/cli.ts --target node --outfile dist/cli.js",
+    "test": "bun test",
+    "prepublishOnly": "bun run build"
+  },
+  "keywords": [
+    "npm",
+    "trusted-publishing",
+    "trusted-publisher",
+    "oidc",
+    "monorepo",
+    "cli",
+    "npm-trust",
+    "github-actions",
+    "gitlab",
+    "circleci"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5"
+  }
+}
