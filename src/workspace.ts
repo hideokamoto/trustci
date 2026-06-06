@@ -16,6 +16,7 @@ function stripComment(line: string): string {
   return line;
 }
 
+/** Strip a single pair of surrounding single or double quotes, if present. */
 function unquote(s: string): string {
   const t = s.trim();
   if (t.length >= 2 && ((t[0] === '"' && t.at(-1) === '"') || (t[0] === "'" && t.at(-1) === "'"))) {
@@ -24,6 +25,7 @@ function unquote(s: string): string {
   return t;
 }
 
+/** Parse a single-line YAML flow array such as `["a/*", "b/*"]`. */
 function parseFlowArray(s: string): string[] {
   const open = s.indexOf("[");
   const close = s.lastIndexOf("]");
@@ -65,6 +67,7 @@ export function parsePnpmPackages(content: string): string[] {
   return result;
 }
 
+/** Read and parse a JSON file (throws on missing file or invalid JSON). */
 function readJson(file: string): any {
   return JSON.parse(readFileSync(file, "utf8"));
 }

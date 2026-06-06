@@ -59,6 +59,15 @@ describe("parseCliArgs", () => {
     expect(parseCliArgs(["list", "pkg", "--dry-run"])).toEqual({ kind: "list", pkg: "pkg", dryRun: true });
   });
 
+  test("optional trust subcommand is equivalent to no subcommand", () => {
+    const base = ["--provider", "github", "--repo", "me/repo", "--file", "f", "--allow-publish"];
+    expect(parseCliArgs(["trust", ...base])).toMatchObject({
+      kind: "trust",
+      options: { provider: "github", repo: "me/repo" },
+    });
+    expect(() => parseCliArgs(["trust", "extra", ...base])).toThrow(/Unexpected argument/);
+  });
+
   test("errors", () => {
     expect(() => parseCliArgs([])).toThrow(ArgError);
     expect(() => parseCliArgs(["--provider", "github", "--repo", "x", "--file", "f"])).toThrow(

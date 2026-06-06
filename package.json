@@ -10,7 +10,8 @@
     "dist"
   ],
   "engines": {
-    "node": ">=22.14.0"
+    "node": ">=22.14.0",
+    "npm": ">=11.5.1"
   },
   "scripts": {
     "build": "bun build src/cli.ts --target node --outfile dist/cli.js",

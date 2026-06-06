@@ -32,7 +32,12 @@ export function compilePathGlob(pattern: string): RegExp {
     if (i < segments.length - 1) parts.push("/");
   }
   // Clean up any `(?:.*/)?` immediately followed by our manual "/".
-  const body = parts.join("").replace(/\(\?:\.\*\/\)\?\//g, "(?:.*/)?");
+  let body = parts.join("").replace(/\(\?:\.\*\/\)\?\//g, "(?:.*/)?");
+  // A trailing `/**` should also match the base directory itself, so that
+  // `apps/**` matches `apps`, `apps/a`, and `apps/a/b`.
+  if (body.endsWith("/(?:.*)?")) {
+    body = `${body.slice(0, -"/(?:.*)?".length)}(?:/.*)?`;
+  }
   return new RegExp(`^${body}$`);
 }
 

@@ -15,6 +15,7 @@ export function cmpVersion(a: string, b: string): number {
   return 0;
 }
 
+/** Return the installed npm version string, or null if npm could not be run. */
 export function getNpmVersion(): string | null {
   const r = run("npm", ["--version"]);
   if (r.status !== 0) return null;
@@ -53,12 +54,14 @@ export function isPublished(name: string): boolean {
   // A 404 genuinely means "not published yet". Any other failure (network
   // outage, auth error, registry down) must not be silently treated as
   // unpublished, or we would skip packages that actually need registering.
-  if (r.stderr.includes("E404") || r.stderr.includes("404 Not Found")) {
+  const out = `${r.stderr}\n${r.stdout}`;
+  if (out.includes("E404") || out.includes("404 Not Found")) {
     return false;
   }
   throw new Error(`failed to check the registry for ${name}: ${r.stderr.trim() || "unknown error"}`);
 }
 
+/** Build the permission/confirmation flags shared by every provider. */
 function commonFlags(o: CommonOptions): string[] {
   const a: string[] = [];
   if (o.allowPublish) a.push("--allow-publish");

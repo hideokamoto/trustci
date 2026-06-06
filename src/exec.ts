@@ -13,7 +13,9 @@ export interface RunResult {
 export function run(cmd: string, args: string[]): RunResult {
   const res = spawnSync(cmd, args, { encoding: "utf8" });
   return {
-    status: res.status ?? (res.error ? 1 : 0),
+    // A null status means the process was killed by a signal (res.signal) or
+    // never spawned (res.error); both are failures, not success.
+    status: res.status ?? (res.error || res.signal ? 1 : 0),
     stdout: res.stdout ?? "",
     stderr: res.stderr ?? "",
   };
@@ -25,5 +27,5 @@ export function run(cmd: string, args: string[]): RunResult {
  */
 export function runInherit(cmd: string, args: string[]): number {
   const res = spawnSync(cmd, args, { stdio: "inherit" });
-  return res.status ?? (res.error ? 1 : 0);
+  return res.status ?? (res.error || res.signal ? 1 : 0);
 }

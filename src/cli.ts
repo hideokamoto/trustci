@@ -12,7 +12,7 @@ const VERSION = "0.1.0";
 const HELP = `trustci — bulk-register npm Trusted Publishers across a monorepo
 
 Usage:
-  trustci --provider <github|gitlab|circleci> [provider flags] [options]
+  trustci [trust] --provider <github|gitlab|circleci> [provider flags] [options]
   trustci list [package] [--dry-run]
 
 Providers:
@@ -45,6 +45,7 @@ Examples:
   trustci list
 `;
 
+/** Prompt the user for a yes/no answer on the terminal. */
 async function confirm(question: string): Promise<boolean> {
   const rl = createInterface({ input: process.stdin, output: process.stderr });
   try {
@@ -55,6 +56,7 @@ async function confirm(question: string): Promise<boolean> {
   }
 }
 
+/** Run `npm trust list` for a single package or every public workspace package. */
 async function runList(pkg: string | undefined, dryRun: boolean): Promise<number> {
   const targets: string[] = [];
   if (pkg) {
@@ -81,6 +83,10 @@ async function runList(pkg: string | undefined, dryRun: boolean): Promise<number
   return failures > 0 ? 1 : 0;
 }
 
+/**
+ * Discover and filter workspace packages, then register each with the provider
+ * (or print the commands under --dry-run).
+ */
 async function runTrust(parsed: Extract<ReturnType<typeof parseCliArgs>, { kind: "trust" }>): Promise<number> {
   const root = process.cwd();
   const { all, source } = discoverPackages(root);
@@ -158,6 +164,7 @@ async function runTrust(parsed: Extract<ReturnType<typeof parseCliArgs>, { kind:
   return failures > 0 ? 1 : 0;
 }
 
+/** Parse argv, run version guards, and dispatch to the right subcommand. */
 async function main(): Promise<number> {
   let parsed: ReturnType<typeof parseCliArgs>;
   try {

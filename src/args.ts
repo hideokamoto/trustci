@@ -28,11 +28,13 @@ const options = {
   version: { type: "boolean", short: "v" },
 } as const;
 
+/** Return the value of a required flag, or throw an ArgError if it is missing. */
 function require_(value: string | undefined, flag: string, provider: string): string {
   if (!value) throw new ArgError(`--${flag} is required for --provider ${provider}.`);
   return value;
 }
 
+/** Parse process argv into a validated, discriminated ParsedArgs value. */
 export function parseCliArgs(argv: string[]): ParsedArgs {
   let values: Record<string, unknown>;
   let positionals: string[];
@@ -53,8 +55,16 @@ export function parseCliArgs(argv: string[]): ParsedArgs {
   if (sub === "list") {
     return { kind: "list", pkg: positionals[1], dryRun };
   }
-  if (sub !== undefined) {
-    throw new ArgError(`Unknown command "${sub}". Did you mean "list", or did you forget --provider?`);
+  // `trust` is an optional leading subcommand; `trustci --provider ...` and
+  // `trustci trust --provider ...` are equivalent.
+  if (sub === "trust") {
+    if (positionals.length > 1) {
+      throw new ArgError(`Unexpected argument "${positionals[1]}" after "trust".`);
+    }
+  } else if (sub !== undefined) {
+    throw new ArgError(
+      `Unknown command "${sub}". Did you mean "list" or "trust", or did you forget --provider?`,
+    );
   }
 
   const provider = values.provider as string | undefined;

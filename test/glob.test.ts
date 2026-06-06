@@ -11,10 +11,12 @@ describe("compilePathGlob", () => {
     expect(re.test("packages/a/b")).toBe(false);
     expect(re.test("apps/a")).toBe(false);
   });
-  test("double star is recursive", () => {
+  test("double star is recursive and matches the base directory", () => {
     const re = compilePathGlob("apps/**");
+    expect(re.test("apps")).toBe(true);
     expect(re.test("apps/a")).toBe(true);
     expect(re.test("apps/a/b")).toBe(true);
+    expect(re.test("other")).toBe(false);
   });
   test("leading **/", () => {
     const re = compilePathGlob("**/test");
