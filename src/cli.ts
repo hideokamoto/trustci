@@ -112,10 +112,15 @@ async function runTrust(parsed: Extract<ReturnType<typeof parseCliArgs>, { kind:
   // Real run: skip packages that are not yet published to the registry.
   const targets: Pkg[] = [];
   for (const pkg of candidates) {
-    if (isPublished(pkg.name)) {
-      targets.push(pkg);
-    } else {
-      console.warn(`skip ${pkg.name}: not published to the registry yet`);
+    try {
+      if (isPublished(pkg.name)) {
+        targets.push(pkg);
+      } else {
+        console.warn(`skip ${pkg.name}: not published to the registry yet`);
+      }
+    } catch (err) {
+      console.error(`error: ${(err as Error).message}`);
+      return 1;
     }
   }
   if (targets.length === 0) {
@@ -126,9 +131,17 @@ async function runTrust(parsed: Extract<ReturnType<typeof parseCliArgs>, { kind:
   console.error(`\nWill register ${targets.length} package(s) with ${provider}:`);
   for (const pkg of targets) console.error(`  - ${pkg.name}`);
 
-  if (!parsed.options.yes && !(await confirm("\nProceed?"))) {
-    console.error("Aborted.");
-    return 1;
+  if (!parsed.options.yes) {
+    if (!process.stdin.isTTY) {
+      console.error(
+        "error: confirmation required but stdin is not a TTY. Pass --yes (-y) to run non-interactively.",
+      );
+      return 1;
+    }
+    if (!(await confirm("\nProceed?"))) {
+      console.error("Aborted.");
+      return 1;
+    }
   }
 
   let failures = 0;

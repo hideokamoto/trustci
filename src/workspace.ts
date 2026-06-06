@@ -69,6 +69,16 @@ function readJson(file: string): any {
   return JSON.parse(readFileSync(file, "utf8"));
 }
 
+/** Read JSON, returning null for missing/invalid files or non-object values. */
+function readJsonSafe(file: string): any {
+  try {
+    const json = readJson(file);
+    return json && typeof json === "object" ? json : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Determine workspace glob patterns and the config file they came from. */
 export function detectPatterns(root: string): { source: string; patterns: string[] } {
   const pnpmFile = path.join(root, "pnpm-workspace.yaml");
@@ -79,15 +89,21 @@ export function detectPatterns(root: string): { source: string; patterns: string
 
   const pkgFile = path.join(root, "package.json");
   if (existsSync(pkgFile)) {
-    const ws = readJson(pkgFile).workspaces;
-    const patterns = Array.isArray(ws) ? ws : Array.isArray(ws?.packages) ? ws.packages : [];
-    if (patterns.length > 0) return { source: "package.json (workspaces)", patterns };
+    const json = readJsonSafe(pkgFile);
+    if (json) {
+      const ws = json.workspaces;
+      const patterns = Array.isArray(ws) ? ws : Array.isArray(ws?.packages) ? ws.packages : [];
+      if (patterns.length > 0) return { source: "package.json (workspaces)", patterns };
+    }
   }
 
   const lernaFile = path.join(root, "lerna.json");
   if (existsSync(lernaFile)) {
-    const patterns = readJson(lernaFile).packages ?? ["packages/*"];
-    if (patterns.length > 0) return { source: "lerna.json", patterns };
+    const json = readJsonSafe(lernaFile);
+    if (json) {
+      const patterns = Array.isArray(json.packages) ? json.packages : ["packages/*"];
+      if (patterns.length > 0) return { source: "lerna.json", patterns };
+    }
   }
 
   return { source: "none", patterns: [] };
@@ -97,13 +113,8 @@ export function detectPatterns(root: string): { source: string; patterns: string
 function readPkg(dir: string): Pkg | null {
   const file = path.join(dir, "package.json");
   if (!existsSync(file)) return null;
-  let json: any;
-  try {
-    json = readJson(file);
-  } catch {
-    return null;
-  }
-  if (typeof json.name !== "string" || !json.name) return null;
+  const json = readJsonSafe(file);
+  if (!json || typeof json.name !== "string" || !json.name) return null;
   return {
     name: json.name,
     version: typeof json.version === "string" ? json.version : undefined,

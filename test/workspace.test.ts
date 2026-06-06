@@ -80,4 +80,19 @@ describe("workspace detection fallbacks", () => {
     writeFileSync(path.join(root, "lerna.json"), JSON.stringify({ packages: ["modules/*"] }));
     expect(detectPatterns(root)).toEqual({ source: "lerna.json", patterns: ["modules/*"] });
   });
+
+  test("malformed package.json does not crash, falls back to none", () => {
+    root = mkdtempSync(path.join(tmpdir(), "trustci-ws4-"));
+    writeFileSync(path.join(root, "package.json"), "{ not valid json");
+    expect(detectPatterns(root)).toEqual({ source: "none", patterns: [] });
+  });
+
+  test("a package directory with null package.json is ignored", () => {
+    root = mkdtempSync(path.join(tmpdir(), "trustci-ws5-"));
+    writeFileSync(path.join(root, "pnpm-workspace.yaml"), `packages:\n  - "packages/*"\n`);
+    makePkg(root, "packages/a", { name: "@scope/a", version: "1.0.0" });
+    mkdirSync(path.join(root, "packages/bad"), { recursive: true });
+    writeFileSync(path.join(root, "packages/bad/package.json"), "null");
+    expect(discoverPackages(root).all.map((p) => p.name)).toEqual(["@scope/a"]);
+  });
 });

@@ -1,7 +1,7 @@
 import { readdirSync } from "node:fs";
 import path from "node:path";
 
-const ALWAYS_IGNORE = new Set(["node_modules", ".git"]);
+const ALWAYS_IGNORE = new Set(["node_modules", ".git", "dist", "build", "coverage", ".turbo"]);
 
 /** Escape regex metacharacters except the glob wildcards we handle. */
 function escape(s: string): string {

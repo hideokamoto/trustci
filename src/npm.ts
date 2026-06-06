@@ -47,7 +47,16 @@ export function checkVersions(): string | null {
 /** Whether a package name already exists on the registry. */
 export function isPublished(name: string): boolean {
   const r = run("npm", ["view", name, "version"]);
-  return r.status === 0 && r.stdout.trim().length > 0;
+  if (r.status === 0) {
+    return r.stdout.trim().length > 0;
+  }
+  // A 404 genuinely means "not published yet". Any other failure (network
+  // outage, auth error, registry down) must not be silently treated as
+  // unpublished, or we would skip packages that actually need registering.
+  if (r.stderr.includes("E404") || r.stderr.includes("404 Not Found")) {
+    return false;
+  }
+  throw new Error(`failed to check the registry for ${name}: ${r.stderr.trim() || "unknown error"}`);
 }
 
 function commonFlags(o: CommonOptions): string[] {
