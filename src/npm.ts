@@ -88,11 +88,11 @@ export function buildTrustArgs(o: ProviderOptions, pkg: string): string[] {
     case "circleci":
       args.push(
         "--org-id",
-        o.orgId,
+        o.orgId!,
         "--project-id",
-        o.projectId,
+        o.projectId!,
         "--pipeline-definition-id",
-        o.pipelineDefinitionId,
+        o.pipelineDefinitionId!,
         "--vcs-origin",
         o.vcsOrigin,
       );

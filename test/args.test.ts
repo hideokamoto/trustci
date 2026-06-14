@@ -46,6 +46,74 @@ describe("parseCliArgs", () => {
     });
   });
 
+  test("circleci with circle-token omits UUID requirements", () => {
+    const r = parseCliArgs([
+      "--provider", "circleci",
+      "--vcs-origin", "https://github.com/me/repo",
+      "--circle-token", "my-token",
+      "--allow-publish",
+    ]);
+    expect(r).toMatchObject({
+      kind: "trust",
+      options: {
+        provider: "circleci",
+        circleToken: "my-token",
+        vcsOrigin: "https://github.com/me/repo",
+        orgId: undefined,
+        projectId: undefined,
+        pipelineDefinitionId: undefined,
+      },
+    });
+  });
+
+  test("circleci with circle-token and partial UUIDs", () => {
+    const r = parseCliArgs([
+      "--provider", "circleci",
+      "--vcs-origin", "https://github.com/me/repo",
+      "--circle-token", "my-token",
+      "--org-id", "my-org",
+      "--file", ".circleci/config.yml",
+      "--allow-publish",
+    ]);
+    expect(r).toMatchObject({
+      kind: "trust",
+      options: {
+        provider: "circleci",
+        circleToken: "my-token",
+        orgId: "my-org",
+        projectId: undefined,
+        pipelineDefinitionId: undefined,
+        file: ".circleci/config.yml",
+      },
+    });
+  });
+
+  test("circleci without circle-token requires all UUIDs", () => {
+    expect(() =>
+      parseCliArgs([
+        "--provider", "circleci",
+        "--vcs-origin", "https://github.com/me/repo",
+        "--allow-publish",
+      ]),
+    ).toThrow(/--org-id is required/);
+    expect(() =>
+      parseCliArgs([
+        "--provider", "circleci",
+        "--vcs-origin", "https://github.com/me/repo",
+        "--org-id", "o",
+        "--allow-publish",
+      ]),
+    ).toThrow(/--project-id is required/);
+    expect(() =>
+      parseCliArgs([
+        "--provider", "circleci",
+        "--vcs-origin", "https://github.com/me/repo",
+        "--org-id", "o", "--project-id", "p",
+        "--allow-publish",
+      ]),
+    ).toThrow(/--pipeline-definition-id is required/);
+  });
+
   test("only/exclude collected as arrays", () => {
     const r = parseCliArgs([
       "--provider", "github", "--repo", "me/repo", "--file", "f", "--allow-publish",

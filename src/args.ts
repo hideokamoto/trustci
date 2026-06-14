@@ -12,6 +12,7 @@ const options = {
   env: { type: "string" },
   file: { type: "string" },
   // circleci
+  "circle-token": { type: "string" },
   "org-id": { type: "string" },
   "project-id": { type: "string" },
   "pipeline-definition-id": { type: "string" },
@@ -109,16 +110,23 @@ export function parseCliArgs(argv: string[]): ParsedArgs {
       if (!vcsOrigin.includes("://")) {
         throw new ArgError(`--vcs-origin must include a protocol, e.g. https://github.com/org/repo (got "${vcsOrigin}").`);
       }
+      const circleToken = values["circle-token"] as string | undefined;
+      const orgId = values["org-id"] as string | undefined;
+      const projectId = values["project-id"] as string | undefined;
+      const pipelineDefinitionId = values["pipeline-definition-id"] as string | undefined;
+      if (!circleToken) {
+        if (!orgId) throw new ArgError("--org-id is required for --provider circleci (or provide --circle-token for auto-resolution).");
+        if (!projectId) throw new ArgError("--project-id is required for --provider circleci (or provide --circle-token for auto-resolution).");
+        if (!pipelineDefinitionId) throw new ArgError("--pipeline-definition-id is required for --provider circleci (or provide --circle-token for auto-resolution).");
+      }
       providerOptions = {
         provider: "circleci",
-        orgId: require_(values["org-id"] as string | undefined, "org-id", "circleci"),
-        projectId: require_(values["project-id"] as string | undefined, "project-id", "circleci"),
-        pipelineDefinitionId: require_(
-          values["pipeline-definition-id"] as string | undefined,
-          "pipeline-definition-id",
-          "circleci",
-        ),
+        circleToken,
+        orgId,
+        projectId,
+        pipelineDefinitionId,
         vcsOrigin,
+        file: values.file as string | undefined,
         contextIds: (values["context-id"] as string[] | undefined) ?? [],
         ...common,
       };
