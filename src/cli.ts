@@ -207,7 +207,8 @@ async function main(): Promise<number> {
   if (parsed.kind === "list") return runList(parsed.pkg, parsed.dryRun);
 
   // Auto-resolve CircleCI UUIDs via API when --circle-token is provided.
-  if (parsed.options.provider === "circleci") {
+  // Skipped on --dry-run since npm is not invoked and no real execution happens.
+  if (parsed.options.provider === "circleci" && !parsed.dryRun) {
     const opts = parsed.options;
     if (opts.circleToken) {
       try {

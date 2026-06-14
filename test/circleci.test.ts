@@ -28,6 +28,12 @@ describe("projectSlugFromVcsOrigin", () => {
     );
   });
 
+  test("hostname lookalike does not match (e.g. mygithub.com)", () => {
+    expect(() => projectSlugFromVcsOrigin("https://mygithub.com/org/repo")).toThrow(
+      /Cannot determine VCS type/,
+    );
+  });
+
   test("missing repo segment throws", () => {
     expect(() => projectSlugFromVcsOrigin("https://github.com/owner")).toThrow(
       /Cannot extract org\/repo/,

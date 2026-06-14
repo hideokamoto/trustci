@@ -1,9 +1,10 @@
 const BASE_URL = "https://circleci.com/api/v2";
 
 function vcsTypeFromUrl(url: string): string {
-  if (url.includes("github.com")) return "github";
-  if (url.includes("gitlab.com")) return "gitlab";
-  if (url.includes("bitbucket.org")) return "bitbucket";
+  const { hostname } = new URL(url);
+  if (hostname === "github.com" || hostname.endsWith(".github.com")) return "github";
+  if (hostname === "gitlab.com" || hostname.endsWith(".gitlab.com")) return "gitlab";
+  if (hostname === "bitbucket.org" || hostname.endsWith(".bitbucket.org")) return "bitbucket";
   throw new Error(`Cannot determine VCS type from URL: ${url}`);
 }
 
