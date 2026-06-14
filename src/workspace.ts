@@ -149,7 +149,7 @@ export function discoverPackages(root: string): DiscoverResult {
 
   // No workspace config found: fall back to treating the root package.json as a single package.
   if (source === "none") {
-    const pkg = readPkg(root);
+    const pkg = readPkg(path.resolve(root));
     if (pkg) {
       return { source: "package.json (root)", patterns: [], all: [pkg] };
     }
