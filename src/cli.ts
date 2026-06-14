@@ -2,6 +2,7 @@
 import process from "node:process";
 import { createInterface } from "node:readline/promises";
 import { ArgError, parseCliArgs } from "./args.ts";
+import { resolveOrgAndProjectId, resolvePipelineDefinitionId } from "./circleci.ts";
 import { runInherit } from "./exec.ts";
 import { buildTrustArgs, checkVersions, displayCommand, isPublished } from "./npm.ts";
 import type { Pkg } from "./types.ts";
@@ -19,8 +20,11 @@ Providers:
   github     --repo <owner/repo> --file <workflow> [--env <name>]
   gitlab     --project <group/project> --file <workflow> [--env <name>]
              (--repo is accepted as an alias for --project)
-  circleci   --org-id <uuid> --project-id <uuid> --pipeline-definition-id <uuid>
-             --vcs-origin <url> [--context-id <uuid> ...]
+  circleci   --vcs-origin <url> --circle-token <token> [--file <config>]
+             [--org-id <uuid>] [--project-id <uuid>] [--pipeline-definition-id <uuid>]
+             [--context-id <uuid> ...]
+             UUIDs are auto-resolved via CircleCI API v2 when --circle-token is provided.
+             Explicit UUIDs override auto-resolution and work without a token.
 
 Permissions (at least one required):
   --allow-publish           allow npm publish
@@ -40,6 +44,8 @@ or lerna.json. Private packages (\"private\": true) are always excluded.
 Examples:
   trustci --dry-run --provider github --repo me/repo --file release.yml --allow-publish
   trustci --provider gitlab --project me/repo --file .gitlab-ci.yml --allow-publish -y
+  trustci --provider circleci --vcs-origin https://github.com/me/repo \\
+    --circle-token $CIRCLECI_TOKEN --allow-publish
   trustci --provider circleci --org-id <uuid> --project-id <uuid> \\
     --pipeline-definition-id <uuid> --vcs-origin https://github.com/me/repo --allow-publish
   trustci list
@@ -198,7 +204,35 @@ async function main(): Promise<number> {
     }
   }
 
-  return parsed.kind === "list" ? runList(parsed.pkg, parsed.dryRun) : runTrust(parsed);
+  if (parsed.kind === "list") return runList(parsed.pkg, parsed.dryRun);
+
+  // Auto-resolve CircleCI UUIDs via API when --circle-token is provided.
+  if (parsed.options.provider === "circleci") {
+    const opts = parsed.options;
+    if (opts.circleToken) {
+      try {
+        if (!opts.orgId || !opts.projectId) {
+          console.error("Resolving org-id and project-id via CircleCI API...");
+          const resolved = await resolveOrgAndProjectId(opts.circleToken, opts.vcsOrigin);
+          opts.orgId ??= resolved.orgId;
+          opts.projectId ??= resolved.projectId;
+        }
+        if (!opts.pipelineDefinitionId) {
+          console.error("Resolving pipeline-definition-id via CircleCI API...");
+          opts.pipelineDefinitionId = await resolvePipelineDefinitionId(
+            opts.circleToken,
+            opts.projectId!,
+            opts.file,
+          );
+        }
+      } catch (err) {
+        console.error(`error: ${(err as Error).message}`);
+        return 1;
+      }
+    }
+  }
+
+  return runTrust(parsed);
 }
 
 main().then(

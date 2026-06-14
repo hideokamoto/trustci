@@ -41,11 +41,18 @@ export interface GitlabOptions extends CommonOptions {
 
 export interface CircleciOptions extends CommonOptions {
   provider: "circleci";
-  orgId: string;
-  projectId: string;
-  pipelineDefinitionId: string;
+  /** CircleCI API token for auto-resolving UUIDs. */
+  circleToken?: string;
+  /** Auto-resolved via API when circleToken is provided. */
+  orgId?: string;
+  /** Auto-resolved via API when circleToken is provided. */
+  projectId?: string;
+  /** Auto-resolved via API when circleToken is provided. */
+  pipelineDefinitionId?: string;
   /** VCS origin URL including protocol, e.g. https://github.com/org/repo */
   vcsOrigin: string;
+  /** Config file path used to resolve pipeline-definition-id, e.g. .circleci/config.yml */
+  file?: string;
   /** Zero or more CircleCI context ids. */
   contextIds: string[];
 }
