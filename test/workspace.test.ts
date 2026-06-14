@@ -96,3 +96,40 @@ describe("workspace detection fallbacks", () => {
     expect(discoverPackages(root).all.map((p) => p.name)).toEqual(["@scope/a"]);
   });
 });
+
+describe("single-package fallback mode", () => {
+  let root: string;
+  afterEach(() => root && rmSync(root, { recursive: true, force: true }));
+
+  test("falls back to root package.json when no workspace config exists", () => {
+    root = mkdtempSync(path.join(tmpdir(), "trustci-single-"));
+    writeFileSync(path.join(root, "package.json"), JSON.stringify({ name: "my-pkg", version: "1.0.0" }));
+    const result = discoverPackages(root);
+    expect(result.source).toBe("package.json (root)");
+    expect(result.patterns).toEqual([]);
+    expect(result.all).toHaveLength(1);
+    expect(result.all[0].name).toBe("my-pkg");
+    expect(result.all[0].private).toBe(false);
+  });
+
+  test("single-package fallback includes private packages in all (filterPackages excludes them)", () => {
+    root = mkdtempSync(path.join(tmpdir(), "trustci-single-priv-"));
+    writeFileSync(
+      path.join(root, "package.json"),
+      JSON.stringify({ name: "my-private-pkg", version: "1.0.0", private: true }),
+    );
+    const { all, source } = discoverPackages(root);
+    expect(source).toBe("package.json (root)");
+    expect(all).toHaveLength(1);
+    expect(all[0].private).toBe(true);
+    // filterPackages must exclude it
+    expect(filterPackages(all, [], [])).toHaveLength(0);
+  });
+
+  test("no fallback when root package.json is also missing", () => {
+    root = mkdtempSync(path.join(tmpdir(), "trustci-empty-"));
+    const result = discoverPackages(root);
+    expect(result.source).toBe("none");
+    expect(result.all).toHaveLength(0);
+  });
+});

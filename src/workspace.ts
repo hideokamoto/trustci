@@ -146,6 +146,15 @@ export function discoverPackages(root: string): DiscoverResult {
       all.push(pkg);
     }
   }
+
+  // No workspace config found: fall back to treating the root package.json as a single package.
+  if (source === "none") {
+    const pkg = readPkg(path.resolve(root));
+    if (pkg) {
+      return { source: "package.json (root)", patterns: [], all: [pkg] };
+    }
+  }
+
   return { source, patterns, all };
 }
 
