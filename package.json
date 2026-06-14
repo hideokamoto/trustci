@@ -1,6 +1,6 @@
 {
   "name": "trustci",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Bulk-register npm Trusted Publishers (npm trust) across all public packages in a monorepo. Supports GitHub, GitLab and CircleCI.",
   "type": "module",
   "bin": {
