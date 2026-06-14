@@ -35,7 +35,8 @@ Options:
   -v, --version             show the trustci version
 
 Workspaces are detected from pnpm-workspace.yaml, package.json "workspaces",
-or lerna.json. Private packages (\"private\": true) are always excluded.
+or lerna.json. If no workspace config is found, the root package.json is used
+as a single-package fallback. Private packages (\"private\": true) are always excluded.
 
 Examples:
   trustci --dry-run --provider github --repo me/repo --file release.yml --allow-publish
