@@ -108,8 +108,8 @@ describe("single-package fallback mode", () => {
     expect(result.source).toBe("package.json (root)");
     expect(result.patterns).toEqual([]);
     expect(result.all).toHaveLength(1);
-    expect(result.all[0].name).toBe("my-pkg");
-    expect(result.all[0].private).toBe(false);
+    expect(result.all[0]?.name).toBe("my-pkg");
+    expect(result.all[0]?.private).toBe(false);
   });
 
   test("single-package fallback includes private packages in all (filterPackages excludes them)", () => {
@@ -121,7 +121,7 @@ describe("single-package fallback mode", () => {
     const { all, source } = discoverPackages(root);
     expect(source).toBe("package.json (root)");
     expect(all).toHaveLength(1);
-    expect(all[0].private).toBe(true);
+    expect(all[0]?.private).toBe(true);
     // filterPackages must exclude it
     expect(filterPackages(all, [], [])).toHaveLength(0);
   });
