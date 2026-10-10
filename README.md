@@ -78,8 +78,33 @@ published artifact is plain Node-compatible JS.
 ```bash
 bun install
 bun test
+bun run typecheck
 bun run build   # -> dist/cli.js (npx entry point), via `bun build --target node`
 ```
+
+`bun install` also enables a husky `commit-msg` hook that runs
+[commitlint](https://commitlint.js.org/) with `@commitlint/config-conventional`,
+so every commit must be a [Conventional Commit](https://www.conventionalcommits.org/).
+
+## Releasing
+
+Releases are automated: every merge to `main` runs the CircleCI config
+`workflows/publish/npm-polyrepo-bun-semantic-release.yaml` from
+[hideokamoto/circleci-configurations](https://github.com/hideokamoto/circleci-configurations).
+[semantic-release](https://github.com/semantic-release/semantic-release) decides the
+next version from the commits since the latest `v*` tag, pushes the tag, publishes
+to npm via Trusted Publishing (OIDC), and creates the GitHub Release.
+
+| Commit | Release |
+| --- | --- |
+| `fix:` / `perf:` | patch |
+| `feat:` | minor |
+| `feat!:` / `fix!:` or a `BREAKING CHANGE:` footer | major |
+| `chore:` / `docs:` / `ci:` / `test:` / `refactor:` … | none |
+
+Do not bump `version` in `package.json`, create tags, or run `npm publish` manually.
+Release notes are published on
+[GitHub Releases](https://github.com/hideokamoto/trustci/releases).
 
 ## License
 
