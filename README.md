@@ -32,7 +32,7 @@ npx trustci list
 | ---------- | ---------------------------------------------------------------------------------------------- | --------------- |
 | `github`   | `--repo <owner/repo>` `--file <workflow>`                                                       | `--env <name>`  |
 | `gitlab`   | `--project <group/project>` (or `--repo`) `--file <workflow>`                                   | `--env <name>`  |
-| `circleci` | `--org-id` `--project-id` `--pipeline-definition-id` `--vcs-origin <host/owner/repo>`                      | `--context-id` (repeatable) |
+| `circleci` | `--vcs-origin <host/owner/repo>`, plus either all of `--org-id` `--project-id` `--pipeline-definition-id` or a CircleCI token | `--circle-token`, `--file`, `--context-id` (repeatable) |
 
 At least one of `--allow-publish` / `--allow-stage-publish` is required.
 
@@ -47,6 +47,23 @@ npx trustci --provider circleci \
   --context-id <uuid> \
   --allow-publish
 ```
+
+#### CircleCI token lookup
+
+When any of the three UUIDs is missing, trustci resolves it through the CircleCI
+API v2. The token is taken from the first of these that is set, and trustci
+prints which one it used (never the token itself):
+
+1. `--circle-token`
+2. `CIRCLE_TOKEN` (circleci CLI v1, chunk)
+3. `CIRCLECI_TOKEN` (chunk)
+4. `CIRCLE_CLI_TOKEN` (circleci CLI v1, legacy alias)
+5. `CIRCLECI_CLI_TOKEN` (circleci CLI v0.1)
+6. `token` in `~/.circleci/cli.yml`, written by `circleci setup` in circleci CLI v0.1.
+   It is ignored when its `host` is not `https://circleci.com`.
+
+The OS keychain, where circleci CLI v1 and chunk store tokens by default, is not read.
+When all three UUIDs are given, no token is looked up.
 
 ### Common options
 
