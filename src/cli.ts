@@ -20,7 +20,7 @@ Providers:
   github     --repo <owner/repo> --file <workflow> [--env <name>]
   gitlab     --project <group/project> --file <workflow> [--env <name>]
              (--repo is accepted as an alias for --project)
-  circleci   --vcs-origin <url> --circle-token <token> [--file <config>]
+  circleci   --vcs-origin <host/owner/repo> --circle-token <token> [--file <config>]
              [--org-id <uuid>] [--project-id <uuid>] [--pipeline-definition-id <uuid>]
              [--context-id <uuid> ...]
              UUIDs are auto-resolved via CircleCI API v2 when --circle-token is provided.
@@ -45,10 +45,10 @@ as a single-package fallback. Private packages (\"private\": true) are always ex
 Examples:
   trustci --dry-run --provider github --repo me/repo --file release.yml --allow-publish
   trustci --provider gitlab --project me/repo --file .gitlab-ci.yml --allow-publish -y
-  trustci --provider circleci --vcs-origin https://github.com/me/repo \\
+  trustci --provider circleci --vcs-origin github.com/me/repo \\
     --circle-token $CIRCLECI_TOKEN --allow-publish
   trustci --provider circleci --org-id <uuid> --project-id <uuid> \\
-    --pipeline-definition-id <uuid> --vcs-origin https://github.com/me/repo --allow-publish
+    --pipeline-definition-id <uuid> --vcs-origin github.com/me/repo --allow-publish
   trustci list
 `;
 
