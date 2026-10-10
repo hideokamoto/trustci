@@ -2,8 +2,8 @@
 import process from "node:process";
 import { createInterface } from "node:readline/promises";
 import { ArgError, parseCliArgs } from "./args.ts";
-import { resolveOrgAndProjectId, resolvePipelineDefinitionId } from "./circleci.ts";
 import { runInherit } from "./exec.ts";
+import { resolveCircleciOptions } from "./resolve.ts";
 import { buildTrustArgs, checkVersions, displayCommand, isPublished } from "./npm.ts";
 import type { Pkg } from "./types.ts";
 import { discoverPackages, filterPackages } from "./workspace.ts";
@@ -208,30 +208,11 @@ async function main(): Promise<number> {
   if (parsed.kind === "list") return runList(parsed.pkg, parsed.dryRun);
 
   // Auto-resolve CircleCI UUIDs via API when --circle-token is provided.
-  // Skipped on --dry-run since npm is not invoked and no real execution happens.
-  if (parsed.options.provider === "circleci" && !parsed.dryRun) {
-    const opts = parsed.options;
-    if (opts.circleToken) {
-      try {
-        if (!opts.orgId || !opts.projectId) {
-          console.error("Resolving org-id and project-id via CircleCI API...");
-          const resolved = await resolveOrgAndProjectId(opts.circleToken, opts.vcsOrigin);
-          opts.orgId ??= resolved.orgId;
-          opts.projectId ??= resolved.projectId;
-        }
-        if (!opts.pipelineDefinitionId) {
-          console.error("Resolving pipeline-definition-id via CircleCI API...");
-          opts.pipelineDefinitionId = await resolvePipelineDefinitionId(
-            opts.circleToken,
-            opts.projectId!,
-            opts.file,
-          );
-        }
-      } catch (err) {
-        console.error(`error: ${(err as Error).message}`);
-        return 1;
-      }
-    }
+  try {
+    await resolveCircleciOptions(parsed);
+  } catch (err) {
+    console.error(`error: ${(err as Error).message}`);
+    return 1;
   }
 
   return runTrust(parsed);
