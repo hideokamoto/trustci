@@ -100,6 +100,11 @@ describe("parseCliArgs", () => {
     });
   });
 
+  test("circleci without --vcs-origin parses; it is inferred when resolving", () => {
+    const r = parseCliArgs(["--provider", "circleci", "--allow-publish"]);
+    expect(r).toMatchObject({ kind: "trust", options: { provider: "circleci", vcsOrigin: undefined } });
+  });
+
   test("circleci without circle-token parses; UUIDs are checked when resolving", () => {
     const r = parseCliArgs([
       "--provider", "circleci",

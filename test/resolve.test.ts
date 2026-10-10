@@ -32,6 +32,8 @@ function deps(over: Partial<ResolveDeps> = {}): ResolveDeps & { logs: string[] }
     env: {},
     homedir: "/home/u",
     readFile: () => null,
+    cwd: "/repo",
+    gitRemoteUrl: () => null,
     ...over,
     logs,
   };
@@ -106,5 +108,40 @@ describe("resolveCircleciOptions", () => {
     expect(msg).toContain("~/.circleci/cli.yml");
     expect(msg).toContain("401");
     expect(msg).toContain("--circle-token");
+  });
+
+  test("infers a missing --vcs-origin from package.json and reports the source", async () => {
+    const d = deps({
+      readFile: (path) => (path === "/repo/package.json" ? JSON.stringify({ repository: "github:o/r" }) : null),
+    });
+    const p = trust({ vcsOrigin: undefined, orgId: "o", projectId: "p", pipelineDefinitionId: "d" });
+    await resolveCircleciOptions(p, d);
+    expect(p.options).toMatchObject({ vcsOrigin: "github.com/o/r" });
+    expect(d.logs.join("\n")).toContain("vcs-origin: github.com/o/r (from package.json repository)");
+  });
+
+  test("infers a missing --vcs-origin from the git remote before using it for the API", async () => {
+    const d = deps({ env: { CIRCLE_TOKEN: "t" }, gitRemoteUrl: () => "git@github.com:o/r.git" });
+    const p = trust({ vcsOrigin: undefined });
+    await resolveCircleciOptions(p, d);
+    expect(d.resolveOrgAndProjectId).toHaveBeenCalledWith("t", "github.com/o/r");
+  });
+
+  test("an explicit --vcs-origin is kept and the repo is not inspected", async () => {
+    let gitCalls = 0;
+    const d = deps({ gitRemoteUrl: () => (gitCalls++, "git@github.com:x/y.git") });
+    const p = trust({ orgId: "o", projectId: "p", pipelineDefinitionId: "d" });
+    await resolveCircleciOptions(p, d);
+    expect(p.options).toMatchObject({ vcsOrigin: "github.com/me/repo" });
+    expect(gitCalls).toBe(0);
+  });
+
+  test("no --vcs-origin and nothing to infer from: says where it looked", async () => {
+    const p = trust({ vcsOrigin: undefined, orgId: "o", projectId: "p", pipelineDefinitionId: "d" });
+    const err = await resolveCircleciOptions(p, deps()).catch((e: Error) => e);
+    const msg = (err as Error).message;
+    expect(msg).toContain("--vcs-origin");
+    expect(msg).toContain("package.json");
+    expect(msg).toContain("git remote");
   });
 });
