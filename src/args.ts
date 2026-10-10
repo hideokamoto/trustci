@@ -1,4 +1,5 @@
 import { parseArgs } from "node:util";
+import { normalizeVcsOrigin } from "./circleci.ts";
 import { PROVIDERS, type CommonOptions, type ParsedArgs, type Provider, type ProviderOptions } from "./types.ts";
 
 /** Thrown for user-facing argument errors; caught by the CLI to print usage. */
@@ -106,9 +107,12 @@ export function parseCliArgs(argv: string[]): ParsedArgs {
       break;
     }
     case "circleci": {
-      const vcsOrigin = require_(values["vcs-origin"] as string | undefined, "vcs-origin", "circleci");
-      if (!vcsOrigin.includes("://")) {
-        throw new ArgError(`--vcs-origin must include a protocol, e.g. https://github.com/org/repo (got "${vcsOrigin}").`);
+      let vcsOrigin: string;
+      try {
+        vcsOrigin = normalizeVcsOrigin(require_(values["vcs-origin"] as string | undefined, "vcs-origin", "circleci"));
+      } catch (e) {
+        if (e instanceof ArgError) throw e;
+        throw new ArgError(`--${(e as Error).message}`);
       }
       const circleToken = values["circle-token"] as string | undefined;
       const orgId = values["org-id"] as string | undefined;

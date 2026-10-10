@@ -8,8 +8,23 @@ function vcsTypeFromUrl(url: string): string {
   throw new Error(`Cannot determine VCS type from URL: ${url}`);
 }
 
-/** Convert a vcs-origin URL to a CircleCI project slug (e.g. "github/owner/repo"). */
-export function projectSlugFromVcsOrigin(url: string): string {
+/**
+ * Normalize a vcs-origin to the scheme-less form `npm trust circleci` requires
+ * (e.g. "https://github.com/owner/repo/" -> "github.com/owner/repo").
+ * Both the scheme-less and the URL form are accepted as input.
+ */
+export function normalizeVcsOrigin(value: string): string {
+  const v = value.trim().replace(/^[a-z][a-z0-9+.-]*:\/\//i, "").replace(/\/+$/, "");
+  const parts = v.split("/");
+  if (parts.length < 3 || parts.some((p) => !p)) {
+    throw new Error(`vcs-origin must be in the form host/owner/repo, e.g. github.com/org/repo (got "${value}").`);
+  }
+  return v;
+}
+
+/** Convert a vcs-origin (with or without scheme) to a CircleCI project slug (e.g. "github/owner/repo"). */
+export function projectSlugFromVcsOrigin(origin: string): string {
+  const url = origin.includes("://") ? origin : `https://${origin}`;
   const vcsType = vcsTypeFromUrl(url);
   const { pathname } = new URL(url);
   const parts = pathname.replace(/^\//, "").replace(/\.git$/, "").split("/");
