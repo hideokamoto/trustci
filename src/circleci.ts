@@ -40,15 +40,16 @@ export async function resolveOrgAndProjectId(
   return { orgId: project.organization_id, projectId: project.id };
 }
 
+/** An item of GET /projects/{project_id}/pipeline-definitions. */
 interface PipelineDef {
   id: string;
-  config_file_path?: string;
   name?: string;
+  config_source?: { file_path?: string };
 }
 
 /**
  * Resolve pipeline-definition-id for a given project.
- * If `file` is provided, selects the definition whose config_file_path or name matches.
+ * If `file` is provided, selects the definition whose config_source.file_path or name matches.
  * If only one definition exists and no file is specified, returns it directly.
  */
 export async function resolvePipelineDefinitionId(
@@ -58,15 +59,15 @@ export async function resolvePipelineDefinitionId(
 ): Promise<string> {
   const data = await circleGet<{ items: PipelineDef[] }>(
     token,
-    `/pipeline-definitions?project_id=${encodeURIComponent(projectId)}`,
+    `/projects/${encodeURIComponent(projectId)}/pipeline-definitions`,
   );
   if (data.items.length === 0) {
     throw new Error(`No pipeline definitions found for project "${projectId}".`);
   }
   if (file) {
-    const match = data.items.find((d) => d.config_file_path === file || d.name === file);
+    const match = data.items.find((d) => d.config_source?.file_path === file || d.name === file);
     if (!match) {
-      const available = data.items.map((d) => d.config_file_path ?? d.name ?? d.id).join(", ");
+      const available = data.items.map((d) => d.config_source?.file_path ?? d.name ?? d.id).join(", ");
       throw new Error(`No pipeline definition found matching "${file}". Available: ${available}`);
     }
     return match.id;
@@ -74,7 +75,7 @@ export async function resolvePipelineDefinitionId(
   if (data.items.length === 1) {
     return data.items[0].id;
   }
-  const available = data.items.map((d) => d.config_file_path ?? d.name ?? d.id).join(", ");
+  const available = data.items.map((d) => d.config_source?.file_path ?? d.name ?? d.id).join(", ");
   throw new Error(
     `Multiple pipeline definitions found for project "${projectId}". Specify --file to select one: ${available}`,
   );
