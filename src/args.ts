@@ -107,11 +107,12 @@ export function parseCliArgs(argv: string[]): ParsedArgs {
       break;
     }
     case "circleci": {
-      let vcsOrigin: string;
+      // When omitted, --vcs-origin is inferred later from package.json or git.
+      const rawVcsOrigin = values["vcs-origin"] as string | undefined;
+      let vcsOrigin: string | undefined;
       try {
-        vcsOrigin = normalizeVcsOrigin(require_(values["vcs-origin"] as string | undefined, "vcs-origin", "circleci"));
+        vcsOrigin = rawVcsOrigin === undefined ? undefined : normalizeVcsOrigin(rawVcsOrigin);
       } catch (e) {
-        if (e instanceof ArgError) throw e;
         throw new ArgError(`--${(e as Error).message}`);
       }
       const circleToken = values["circle-token"] as string | undefined;

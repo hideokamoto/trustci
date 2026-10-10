@@ -21,9 +21,11 @@ Providers:
   github     --repo <owner/repo> --file <workflow> [--env <name>]
   gitlab     --project <group/project> --file <workflow> [--env <name>]
              (--repo is accepted as an alias for --project)
-  circleci   --vcs-origin <host/owner/repo> [--circle-token <token>] [--file <config>]
+  circleci   [--vcs-origin <host/owner/repo>] [--circle-token <token>] [--file <config>]
              [--org-id <uuid>] [--project-id <uuid>] [--pipeline-definition-id <uuid>]
              [--context-id <uuid> ...]
+             --vcs-origin defaults to the root package.json "repository", then
+             \`git remote get-url origin\`.
              Missing UUIDs are resolved via CircleCI API v2 using a token from
              --circle-token, $CIRCLE_TOKEN, $CIRCLECI_TOKEN, $CIRCLE_CLI_TOKEN,
              $CIRCLECI_CLI_TOKEN, or ~/.circleci/cli.yml (in that order).
@@ -48,7 +50,7 @@ as a single-package fallback. Private packages (\"private\": true) are always ex
 Examples:
   trustci --dry-run --provider github --repo me/repo --file release.yml --allow-publish
   trustci --provider gitlab --project me/repo --file .gitlab-ci.yml --allow-publish -y
-  CIRCLE_TOKEN=... trustci --provider circleci --vcs-origin github.com/me/repo --allow-publish
+  CIRCLE_TOKEN=... trustci --provider circleci --allow-publish
   trustci --provider circleci --org-id <uuid> --project-id <uuid> \\
     --pipeline-definition-id <uuid> --vcs-origin github.com/me/repo --allow-publish
   trustci list
@@ -209,7 +211,7 @@ async function main(): Promise<number> {
 
   if (parsed.kind === "list") return runList(parsed.pkg, parsed.dryRun);
 
-  // Auto-resolve missing CircleCI UUIDs via the API.
+  // Infer a missing --vcs-origin and resolve missing CircleCI UUIDs via the API.
   try {
     await resolveCircleciOptions(parsed);
   } catch (err) {

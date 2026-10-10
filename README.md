@@ -32,7 +32,7 @@ npx trustci list
 | ---------- | ---------------------------------------------------------------------------------------------- | --------------- |
 | `github`   | `--repo <owner/repo>` `--file <workflow>`                                                       | `--env <name>`  |
 | `gitlab`   | `--project <group/project>` (or `--repo`) `--file <workflow>`                                   | `--env <name>`  |
-| `circleci` | `--vcs-origin <host/owner/repo>`, plus either all of `--org-id` `--project-id` `--pipeline-definition-id` or a CircleCI token | `--circle-token`, `--file`, `--context-id` (repeatable) |
+| `circleci` | Either all of `--org-id` `--project-id` `--pipeline-definition-id`, or a CircleCI token | `--vcs-origin <host/owner/repo>`, `--circle-token`, `--file`, `--context-id` (repeatable) |
 
 At least one of `--allow-publish` / `--allow-stage-publish` is required.
 
@@ -47,6 +47,14 @@ npx trustci --provider circleci \
   --context-id <uuid> \
   --allow-publish
 ```
+
+#### CircleCI `--vcs-origin`
+
+When `--vcs-origin` is omitted, trustci takes it from the root `package.json`
+`repository` field (URL, `git+https://…`, `git@host:owner/repo`, or the
+`github:` / `gitlab:` / `bitbucket:` / `owner/repo` shorthands), then from
+`git remote get-url origin`. It prints which one it used, and warns when the two
+disagree (`package.json` wins, since it is committed rather than clone-specific).
 
 #### CircleCI token lookup
 

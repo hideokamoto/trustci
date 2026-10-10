@@ -49,8 +49,11 @@ export interface CircleciOptions extends CommonOptions {
   projectId?: string;
   /** Auto-resolved via API when circleToken is provided. */
   pipelineDefinitionId?: string;
-  /** VCS origin without scheme, as npm expects it, e.g. github.com/org/repo */
-  vcsOrigin: string;
+  /**
+   * VCS origin without scheme, as npm expects it, e.g. github.com/org/repo.
+   * Inferred from package.json or git when not given.
+   */
+  vcsOrigin?: string;
   /** Config file path used to resolve pipeline-definition-id, e.g. .circleci/config.yml */
   file?: string;
   /** Zero or more CircleCI context ids. */
