@@ -7,8 +7,9 @@ import { runInherit } from "./exec.ts";
 import { buildTrustArgs, checkVersions, displayCommand, isPublished } from "./npm.ts";
 import type { Pkg } from "./types.ts";
 import { discoverPackages, filterPackages } from "./workspace.ts";
+import { version as pkgVersion } from "../package.json" with { type: "json" };
 
-const VERSION = "0.1.0";
+const VERSION: string = pkgVersion;
 
 const HELP = `trustci — bulk-register npm Trusted Publishers across a monorepo
 
