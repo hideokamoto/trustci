@@ -26,8 +26,9 @@ export async function resolveCircleciOptions(
 ): Promise<void> {
   const opts = parsed.options;
   if (opts.provider !== "circleci") return;
-  // Skipped on --dry-run since npm is not invoked and no real execution happens.
-  if (parsed.dryRun || !opts.circleToken) return;
+  // Also runs on --dry-run: these are read-only GETs, and the printed commands
+  // would otherwise contain empty UUIDs.
+  if (!opts.circleToken) return;
   if (!opts.orgId || !opts.projectId) {
     deps.log("Resolving org-id and project-id via CircleCI API...");
     const resolved = await deps.resolveOrgAndProjectId(opts.circleToken, opts.vcsOrigin);
