@@ -6,6 +6,10 @@ import {
 } from "../src/circleci.ts";
 
 describe("projectSlugFromVcsOrigin", () => {
+  test("scheme-less origin", () => {
+    expect(projectSlugFromVcsOrigin("github.com/owner/repo")).toBe("github/owner/repo");
+  });
+
   test("github URL", () => {
     expect(projectSlugFromVcsOrigin("https://github.com/owner/repo")).toBe("github/owner/repo");
   });
