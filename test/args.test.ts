@@ -42,8 +42,20 @@ describe("parseCliArgs", () => {
     ]);
     expect(r).toMatchObject({
       kind: "trust",
-      options: { provider: "circleci", contextIds: ["c1", "c2"], vcsOrigin: "https://github.com/me/repo" },
+      options: { provider: "circleci", contextIds: ["c1", "c2"], vcsOrigin: "github.com/me/repo" },
     });
+  });
+
+  test("circleci accepts vcs-origin with or without scheme and normalizes for npm", () => {
+    for (const input of ["github.com/me/repo", "https://github.com/me/repo", "https://github.com/me/repo/"]) {
+      const r = parseCliArgs([
+        "--provider", "circleci",
+        "--org-id", "o", "--project-id", "p", "--pipeline-definition-id", "d",
+        "--vcs-origin", input,
+        "--allow-publish",
+      ]);
+      expect(r).toMatchObject({ kind: "trust", options: { vcsOrigin: "github.com/me/repo" } });
+    }
   });
 
   test("circleci with circle-token omits UUID requirements", () => {
@@ -58,7 +70,7 @@ describe("parseCliArgs", () => {
       options: {
         provider: "circleci",
         circleToken: "my-token",
-        vcsOrigin: "https://github.com/me/repo",
+        vcsOrigin: "github.com/me/repo",
         orgId: undefined,
         projectId: undefined,
         pipelineDefinitionId: undefined,
@@ -148,9 +160,9 @@ describe("parseCliArgs", () => {
     expect(() =>
       parseCliArgs([
         "--provider", "circleci", "--org-id", "o", "--project-id", "p",
-        "--pipeline-definition-id", "d", "--vcs-origin", "github.com/me/repo", "--allow-publish",
+        "--pipeline-definition-id", "d", "--vcs-origin", "github.com/me", "--allow-publish",
       ]),
-    ).toThrow(/must include a protocol/);
+    ).toThrow(/--vcs-origin must be in the form host\/owner\/repo/);
     expect(() => parseCliArgs(["bogus"])).toThrow(/Unknown command/);
   });
 });
