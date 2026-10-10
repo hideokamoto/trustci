@@ -30,6 +30,18 @@
     "gitlab",
     "circleci"
   ],
+  "author": {
+    "name": "Hidetaka Okamoto",
+    "url": "https://github.com/hideokamoto"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hideokamoto/trustci.git"
+  },
+  "homepage": "https://github.com/hideokamoto/trustci#readme",
+  "bugs": {
+    "url": "https://github.com/hideokamoto/trustci/issues"
+  },
   "license": "MIT",
   "devDependencies": {
     "@types/bun": "latest",
