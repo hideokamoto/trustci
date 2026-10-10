@@ -118,11 +118,6 @@ export function parseCliArgs(argv: string[]): ParsedArgs {
       const orgId = values["org-id"] as string | undefined;
       const projectId = values["project-id"] as string | undefined;
       const pipelineDefinitionId = values["pipeline-definition-id"] as string | undefined;
-      if (!circleToken) {
-        if (!orgId) throw new ArgError("--org-id is required for --provider circleci (or provide --circle-token for auto-resolution).");
-        if (!projectId) throw new ArgError("--project-id is required for --provider circleci (or provide --circle-token for auto-resolution).");
-        if (!pipelineDefinitionId) throw new ArgError("--pipeline-definition-id is required for --provider circleci (or provide --circle-token for auto-resolution).");
-      }
       providerOptions = {
         provider: "circleci",
         circleToken,

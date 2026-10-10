@@ -20,11 +20,13 @@ Providers:
   github     --repo <owner/repo> --file <workflow> [--env <name>]
   gitlab     --project <group/project> --file <workflow> [--env <name>]
              (--repo is accepted as an alias for --project)
-  circleci   --vcs-origin <host/owner/repo> --circle-token <token> [--file <config>]
+  circleci   --vcs-origin <host/owner/repo> [--circle-token <token>] [--file <config>]
              [--org-id <uuid>] [--project-id <uuid>] [--pipeline-definition-id <uuid>]
              [--context-id <uuid> ...]
-             UUIDs are auto-resolved via CircleCI API v2 when --circle-token is provided.
-             Explicit UUIDs override auto-resolution and work without a token.
+             Missing UUIDs are resolved via CircleCI API v2 using a token from
+             --circle-token, $CIRCLE_TOKEN, $CIRCLECI_TOKEN, $CIRCLE_CLI_TOKEN,
+             $CIRCLECI_CLI_TOKEN, or ~/.circleci/cli.yml (in that order).
+             Explicit UUIDs override auto-resolution; with all three, no token is needed.
 
 Permissions (at least one required):
   --allow-publish           allow npm publish
@@ -45,8 +47,7 @@ as a single-package fallback. Private packages (\"private\": true) are always ex
 Examples:
   trustci --dry-run --provider github --repo me/repo --file release.yml --allow-publish
   trustci --provider gitlab --project me/repo --file .gitlab-ci.yml --allow-publish -y
-  trustci --provider circleci --vcs-origin github.com/me/repo \\
-    --circle-token $CIRCLECI_TOKEN --allow-publish
+  CIRCLE_TOKEN=... trustci --provider circleci --vcs-origin github.com/me/repo --allow-publish
   trustci --provider circleci --org-id <uuid> --project-id <uuid> \\
     --pipeline-definition-id <uuid> --vcs-origin github.com/me/repo --allow-publish
   trustci list
@@ -207,7 +208,7 @@ async function main(): Promise<number> {
 
   if (parsed.kind === "list") return runList(parsed.pkg, parsed.dryRun);
 
-  // Auto-resolve CircleCI UUIDs via API when --circle-token is provided.
+  // Auto-resolve missing CircleCI UUIDs via the API.
   try {
     await resolveCircleciOptions(parsed);
   } catch (err) {

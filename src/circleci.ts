@@ -34,13 +34,23 @@ export function projectSlugFromVcsOrigin(origin: string): string {
   return `${vcsType}/${parts[0]}/${parts[1]}`;
 }
 
+/** A non-2xx response from the CircleCI API. */
+export class CircleApiError extends Error {
+  constructor(
+    readonly status: number,
+    readonly path: string,
+    readonly body: string,
+  ) {
+    super(`CircleCI API error (${status}) for ${path}: ${body}`);
+  }
+}
+
 async function circleGet<T>(token: string, path: string): Promise<T> {
   const response = await fetch(`${BASE_URL}${path}`, {
     headers: { "Circle-Token": token, Accept: "application/json" },
   });
   if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`CircleCI API error (${response.status}) for ${path}: ${body}`);
+    throw new CircleApiError(response.status, path, await response.text());
   }
   return response.json() as Promise<T>;
 }
