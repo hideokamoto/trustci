@@ -71,8 +71,9 @@ export async function resolvePipelineDefinitionId(
     }
     return match.id;
   }
-  if (data.items.length === 1) {
-    return data.items[0].id;
+  const [only] = data.items;
+  if (data.items.length === 1 && only) {
+    return only.id;
   }
   const available = data.items.map((d) => d.config_file_path ?? d.name ?? d.id).join(", ");
   throw new Error(

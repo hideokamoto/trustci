@@ -5,6 +5,9 @@ import {
   resolvePipelineDefinitionId,
 } from "../src/circleci.ts";
 
+// bun's `typeof fetch` also requires `preconnect`, which a plain mock lacks.
+const mockFetch = (impl: () => Promise<Response>) => mock(impl) as unknown as typeof fetch;
+
 describe("projectSlugFromVcsOrigin", () => {
   test("github URL", () => {
     expect(projectSlugFromVcsOrigin("https://github.com/owner/repo")).toBe("github/owner/repo");
@@ -47,7 +50,7 @@ describe("resolveOrgAndProjectId", () => {
   });
 
   test("returns orgId and projectId from API response", async () => {
-    globalThis.fetch = mock(() =>
+    globalThis.fetch = mockFetch(() =>
       Promise.resolve(
         new Response(
           JSON.stringify({ id: "proj-uuid", organization_id: "org-uuid" }),
@@ -64,7 +67,7 @@ describe("resolveOrgAndProjectId", () => {
   });
 
   test("throws on API error", async () => {
-    globalThis.fetch = mock(() =>
+    globalThis.fetch = mockFetch(() =>
       Promise.resolve(new Response("Unauthorized", { status: 401 })),
     );
     await expect(resolveOrgAndProjectId("bad-token", "https://github.com/owner/repo")).rejects.toThrow(
@@ -79,7 +82,7 @@ describe("resolvePipelineDefinitionId", () => {
   });
 
   test("returns id when exactly one definition exists", async () => {
-    globalThis.fetch = mock(() =>
+    globalThis.fetch = mockFetch(() =>
       Promise.resolve(
         new Response(
           JSON.stringify({ items: [{ id: "def-1", config_file_path: ".circleci/config.yml" }] }),
@@ -92,7 +95,7 @@ describe("resolvePipelineDefinitionId", () => {
   });
 
   test("matches by config_file_path when file is provided", async () => {
-    globalThis.fetch = mock(() =>
+    globalThis.fetch = mockFetch(() =>
       Promise.resolve(
         new Response(
           JSON.stringify({
@@ -110,7 +113,7 @@ describe("resolvePipelineDefinitionId", () => {
   });
 
   test("matches by name when file is provided", async () => {
-    globalThis.fetch = mock(() =>
+    globalThis.fetch = mockFetch(() =>
       Promise.resolve(
         new Response(
           JSON.stringify({
@@ -128,7 +131,7 @@ describe("resolvePipelineDefinitionId", () => {
   });
 
   test("throws when file does not match any definition", async () => {
-    globalThis.fetch = mock(() =>
+    globalThis.fetch = mockFetch(() =>
       Promise.resolve(
         new Response(
           JSON.stringify({
@@ -144,7 +147,7 @@ describe("resolvePipelineDefinitionId", () => {
   });
 
   test("throws when multiple definitions and no file specified", async () => {
-    globalThis.fetch = mock(() =>
+    globalThis.fetch = mockFetch(() =>
       Promise.resolve(
         new Response(
           JSON.stringify({
@@ -163,7 +166,7 @@ describe("resolvePipelineDefinitionId", () => {
   });
 
   test("throws when no definitions found", async () => {
-    globalThis.fetch = mock(() =>
+    globalThis.fetch = mockFetch(() =>
       Promise.resolve(
         new Response(
           JSON.stringify({ items: [] }),
