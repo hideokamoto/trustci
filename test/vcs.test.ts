@@ -80,6 +80,7 @@ describe("resolveVcsOrigin", () => {
   test("warns and keeps package.json when it differs from the git remote", () => {
     const r = resolveVcsOrigin({ pkgRepository: "github:up/r", gitRemote: "git@github.com:fork/r.git" });
     expect(r.value).toBe("github.com/up/r");
+    if (r.value === undefined) throw new Error("expected a resolved vcs-origin");
     expect(r.source).toBe("package.json repository");
     expect(r.warnings.join("\n")).toContain("github.com/fork/r");
   });
@@ -87,6 +88,7 @@ describe("resolveVcsOrigin", () => {
   test("warns about an unreadable package.json repository and falls back to the git remote", () => {
     const r = resolveVcsOrigin({ pkgRepository: "gist:11081aaa281", gitRemote: "https://github.com/o/r.git" });
     expect(r.value).toBe("github.com/o/r");
+    if (r.value === undefined) throw new Error("expected a resolved vcs-origin");
     expect(r.source).toBe("git remote origin");
     expect(r.warnings.join("\n")).toContain("gist:11081aaa281");
   });
