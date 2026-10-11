@@ -32,7 +32,7 @@ npx trustci list
 | ---------- | ---------------------------------------------------------------------------------------------- | --------------- |
 | `github`   | `--repo <owner/repo>` `--file <workflow>`                                                       | `--env <name>`  |
 | `gitlab`   | `--project <group/project>` (or `--repo`) `--file <workflow>`                                   | `--env <name>`  |
-| `circleci` | `--org-id` `--project-id` `--pipeline-definition-id` `--vcs-origin <url>`                        | `--context-id` (repeatable) |
+| `circleci` | `--org-id` `--project-id` `--pipeline-definition-id` `--vcs-origin <host/owner/repo>`                      | `--context-id` (repeatable) |
 
 At least one of `--allow-publish` / `--allow-stage-publish` is required.
 
@@ -40,10 +40,10 @@ At least one of `--allow-publish` / `--allow-stage-publish` is required.
 # GitLab
 npx trustci --provider gitlab --project me/repo --file .gitlab-ci.yml --allow-publish -y
 
-# CircleCI (vcs-origin must include the protocol)
+# CircleCI (vcs-origin is host/owner/repo; a leading https:// is stripped automatically)
 npx trustci --provider circleci \
   --org-id <uuid> --project-id <uuid> --pipeline-definition-id <uuid> \
-  --vcs-origin https://github.com/me/repo \
+  --vcs-origin github.com/me/repo \
   --context-id <uuid> \
   --allow-publish
 ```

@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { parseCliArgs } from "../src/args.ts";
 import { buildTrustArgs, cmpVersion, displayCommand } from "../src/npm.ts";
 import type { CircleciOptions, GithubOptions, GitlabOptions } from "../src/types.ts";
 
@@ -56,7 +57,7 @@ describe("buildTrustArgs", () => {
       orgId: "org-1",
       projectId: "proj-1",
       pipelineDefinitionId: "pipe-1",
-      vcsOrigin: "https://github.com/me/repo",
+      vcsOrigin: "github.com/me/repo",
       contextIds: ["ctx-1", "ctx-2"],
       allowPublish: true,
       allowStagePublish: true,
@@ -67,13 +68,37 @@ describe("buildTrustArgs", () => {
       "--org-id", "org-1",
       "--project-id", "proj-1",
       "--pipeline-definition-id", "pipe-1",
-      "--vcs-origin", "https://github.com/me/repo",
+      "--vcs-origin", "github.com/me/repo",
       "--context-id", "ctx-1",
       "--context-id", "ctx-2",
       "--allow-publish",
       "--allow-stage-publish",
     ]);
   });
+});
+
+// Mirrors validateVcsOrigin in npm's lib/commands/trust/circleci.js (npm 12.2.0):
+// npm rejects a vcs-origin containing "://" or with fewer than 3 "/"-separated parts.
+function npmAcceptsVcsOrigin(value: string): boolean {
+  return !value.includes("://") && value.split("/").length >= 3;
+}
+
+describe("circleci vcs-origin reaches npm in the form npm accepts", () => {
+  for (const input of ["https://github.com/me/repo", "github.com/me/repo"]) {
+    test(`--vcs-origin ${input}`, () => {
+      const parsed = parseCliArgs([
+        "--provider", "circleci",
+        "--org-id", "o", "--project-id", "p", "--pipeline-definition-id", "d",
+        "--vcs-origin", input,
+        "--allow-publish",
+      ]);
+      if (parsed.kind !== "trust") throw new Error("expected trust command");
+      const args = buildTrustArgs(parsed.options, "pkg");
+      const value = args[args.indexOf("--vcs-origin") + 1]!;
+      expect(npmAcceptsVcsOrigin(value)).toBe(true);
+      expect(value).toBe("github.com/me/repo");
+    });
+  }
 });
 
 describe("displayCommand", () => {
