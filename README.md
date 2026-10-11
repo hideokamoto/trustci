@@ -32,7 +32,7 @@ npx trustci list
 | ---------- | ---------------------------------------------------------------------------------------------- | --------------- |
 | `github`   | `--repo <owner/repo>` `--file <workflow>`                                                       | `--env <name>`  |
 | `gitlab`   | `--project <group/project>` (or `--repo`) `--file <workflow>`                                   | `--env <name>`  |
-| `circleci` | Either all of `--org-id` `--project-id` `--pipeline-definition-id`, or a CircleCI token | `--vcs-origin <host/owner/repo>`, `--circle-token`, `--file`, `--context-id` (repeatable) |
+| `circleci` | A CircleCI token, or all of `--org-id` `--project-id` `--pipeline-definition-id` | `--vcs-origin <host/owner/repo>` (inferred), `--circle-token`, `--file`, `--context-id` (repeatable) |
 
 At least one of `--allow-publish` / `--allow-stage-publish` is required.
 
@@ -40,7 +40,12 @@ At least one of `--allow-publish` / `--allow-stage-publish` is required.
 # GitLab
 npx trustci --provider gitlab --project me/repo --file .gitlab-ci.yml --allow-publish -y
 
-# CircleCI (vcs-origin is host/owner/repo; a leading https:// is stripped automatically)
+# CircleCI — minimal form: UUIDs are resolved via the API and --vcs-origin
+# is inferred, so a token (here via the environment) is all you need to add
+CIRCLE_TOKEN=... npx trustci --provider circleci --allow-publish
+
+# CircleCI — fully explicit form
+# (vcs-origin is host/owner/repo; a leading https:// is stripped automatically)
 npx trustci --provider circleci \
   --org-id <uuid> --project-id <uuid> --pipeline-definition-id <uuid> \
   --vcs-origin github.com/me/repo \
@@ -72,6 +77,22 @@ prints which one it used (never the token itself):
 
 The OS keychain, where circleci CLI v1 and chunk store tokens by default, is not read.
 When all three UUIDs are given, no token is looked up.
+
+#### CircleCI pipeline definitions and `--file`
+
+A missing `--pipeline-definition-id` is resolved by listing the project's
+pipeline definitions. When there is exactly one, it is used automatically.
+When the project has several — e.g. a config sourced from another repository
+alongside `.circleci/config.yml` — pass `--file` with either the definition's
+config file path or its name; the error message lists the candidates:
+
+```bash
+npx trustci --provider circleci --allow-publish \
+  --file workflows/publish/npm-polyrepo-bun-semantic-release.yaml
+```
+
+`--file` is only used for this lookup — it is not passed to `npm trust`, and
+it has no effect when `--pipeline-definition-id` is given explicitly.
 
 ### Common options
 
