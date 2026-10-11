@@ -94,7 +94,7 @@ export function buildTrustArgs(o: ProviderOptions, pkg: string): string[] {
         "--pipeline-definition-id",
         o.pipelineDefinitionId!,
         "--vcs-origin",
-        o.vcsOrigin,
+        o.vcsOrigin!,
       );
       for (const c of o.contextIds) args.push("--context-id", c);
       break;

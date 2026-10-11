@@ -100,30 +100,21 @@ describe("parseCliArgs", () => {
     });
   });
 
-  test("circleci without circle-token requires all UUIDs", () => {
-    expect(() =>
-      parseCliArgs([
-        "--provider", "circleci",
-        "--vcs-origin", "https://github.com/me/repo",
-        "--allow-publish",
-      ]),
-    ).toThrow(/--org-id is required/);
-    expect(() =>
-      parseCliArgs([
-        "--provider", "circleci",
-        "--vcs-origin", "https://github.com/me/repo",
-        "--org-id", "o",
-        "--allow-publish",
-      ]),
-    ).toThrow(/--project-id is required/);
-    expect(() =>
-      parseCliArgs([
-        "--provider", "circleci",
-        "--vcs-origin", "https://github.com/me/repo",
-        "--org-id", "o", "--project-id", "p",
-        "--allow-publish",
-      ]),
-    ).toThrow(/--pipeline-definition-id is required/);
+  test("circleci without --vcs-origin parses; it is inferred when resolving", () => {
+    const r = parseCliArgs(["--provider", "circleci", "--allow-publish"]);
+    expect(r).toMatchObject({ kind: "trust", options: { provider: "circleci", vcsOrigin: undefined } });
+  });
+
+  test("circleci without circle-token parses; UUIDs are checked when resolving", () => {
+    const r = parseCliArgs([
+      "--provider", "circleci",
+      "--vcs-origin", "https://github.com/me/repo",
+      "--allow-publish",
+    ]);
+    expect(r).toMatchObject({
+      kind: "trust",
+      options: { provider: "circleci", circleToken: undefined, orgId: undefined, projectId: undefined },
+    });
   });
 
   test("only/exclude collected as arrays", () => {

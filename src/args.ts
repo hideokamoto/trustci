@@ -107,22 +107,18 @@ export function parseCliArgs(argv: string[]): ParsedArgs {
       break;
     }
     case "circleci": {
-      let vcsOrigin: string;
+      // When omitted, --vcs-origin is inferred later from package.json or git.
+      const rawVcsOrigin = values["vcs-origin"] as string | undefined;
+      let vcsOrigin: string | undefined;
       try {
-        vcsOrigin = normalizeVcsOrigin(require_(values["vcs-origin"] as string | undefined, "vcs-origin", "circleci"));
+        vcsOrigin = rawVcsOrigin === undefined ? undefined : normalizeVcsOrigin(rawVcsOrigin);
       } catch (e) {
-        if (e instanceof ArgError) throw e;
         throw new ArgError(`--${(e as Error).message}`);
       }
       const circleToken = values["circle-token"] as string | undefined;
       const orgId = values["org-id"] as string | undefined;
       const projectId = values["project-id"] as string | undefined;
       const pipelineDefinitionId = values["pipeline-definition-id"] as string | undefined;
-      if (!circleToken) {
-        if (!orgId) throw new ArgError("--org-id is required for --provider circleci (or provide --circle-token for auto-resolution).");
-        if (!projectId) throw new ArgError("--project-id is required for --provider circleci (or provide --circle-token for auto-resolution).");
-        if (!pipelineDefinitionId) throw new ArgError("--pipeline-definition-id is required for --provider circleci (or provide --circle-token for auto-resolution).");
-      }
       providerOptions = {
         provider: "circleci",
         circleToken,
