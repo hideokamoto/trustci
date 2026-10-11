@@ -1,0 +1,35 @@
+---
+title: trustci
+description: Bulk-register npm Trusted Publishers across all public packages in a monorepo.
+template: splash
+hero:
+  tagline: Bulk-register npm Trusted Publishers across every public package in a monorepo with a single command. Supports GitHub Actions, GitLab CI/CD and CircleCI.
+  actions:
+    - text: Get started
+      link: /getting-started/
+      icon: right-arrow
+    - text: View on GitHub
+      link: https://github.com/hideokamoto/trustci
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+<CardGrid>
+  <Card title="One command for the whole monorepo" icon="rocket">
+    Setting up trusted publishing one package at a time is tedious. trustci
+    detects your workspace, finds every public package, and runs the right
+    `npm trust <provider> …` for each.
+  </Card>
+  <Card title="Three CI providers" icon="puzzle">
+    GitHub Actions, GitLab CI/CD and CircleCI. For CircleCI, missing IDs are
+    resolved through the CircleCI API.
+  </Card>
+  <Card title="Preview first" icon="magnifier">
+    `--dry-run` prints the `npm trust` commands without running anything.
+  </Card>
+  <Card title="Zero runtime dependencies" icon="seti:npm">
+    Run it with `npx trustci`. It wraps the `npm trust` command shipped with npm.
+  </Card>
+</CardGrid>

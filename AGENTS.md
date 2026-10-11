@@ -6,12 +6,23 @@
 - `bun run typecheck` — `tsc --noEmit`
 - `bun test` — unit tests
 - `bun run build` — bundle `src/cli.ts` to `dist/cli.js`
+- `cd docs && bun install && bun run dev` — documentation site (Astro Starlight), a separate
+  package with its own `bun.lock`; `bun run build` there writes `docs/dist`
+
+## Documentation site
+
+`docs/` is deployed to GitHub Pages at https://trustci.hidetaka.dev by
+`.github/workflows/deploy-docs.yml` on pushes to `main` that touch `docs/`. This is the
+only GitHub Actions workflow; tests and releases stay on CircleCI. The custom domain is
+configured in the repository's Settings → Pages (Source: GitHub Actions), with a DNS
+CNAME `trustci` → `hideokamoto.github.io`. Use `docs:` commits for site changes so they
+do not trigger an npm release.
 
 ## Releases (automated — do not release manually)
 
 Every push to `main` triggers the CircleCI pipeline that uses
 `hideokamoto/circleci-configurations` →
-`workflows/publish/npm-polyrepo-bun-semantic-release.yaml` (no CI YAML lives here).
+`workflows/publish/npm-polyrepo-bun-semantic-release.yaml` (no CircleCI YAML lives here).
 
 - Flow: `test` job (typecheck, build, test) →
   `release` job on `main` runs semantic-release: decides the next version from
