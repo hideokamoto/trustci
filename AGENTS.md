@@ -13,7 +13,7 @@ Every push to `main` triggers the CircleCI pipeline that uses
 `hideokamoto/circleci-configurations` →
 `workflows/publish/npm-polyrepo-bun-semantic-release.yaml` (no CI YAML lives here).
 
-- Flow: `test` job (commitlint on non-main branches, typecheck, build, test) →
+- Flow: `test` job (typecheck, build, test) →
   `release` job on `main` runs semantic-release: decides the next version from
   Conventional Commits since the latest `v*` tag, verifies npm OIDC + git push access,
   pushes the `v*` tag, publishes via npm Trusted Publishing (OIDC), and creates the
@@ -30,7 +30,9 @@ Do not write `BREAKING CHANGE:` in a commit body unless you mean a major release
 
 Agents MUST write Conventional Commit messages and must never bypass the hook
 (`--no-verify`). The husky `commit-msg` hook (`.husky/commit-msg`, `commitlint.config.js`)
-is active only after `bun install`; the CircleCI `test` job re-checks branch commits.
+is active only after `bun install`. CI does not re-check commit messages — the
+hook is the only enforcement, so commits made without it (web merges, plumbing
+commands, environments without `bun install`) reach main unverified.
 
 ### Do NOT
 
@@ -44,7 +46,7 @@ is active only after `bun install`; the CircleCI `test` job re-checks branch com
 | Symptom | Check |
 | --- | --- |
 | No publish after merge | Did the merged commits include `feat:`/`fix:`/`perf:`? Check the CircleCI `release` job log (`There are no relevant changes` = nothing to release) |
-| `commitlint` fails in the `test` job | Reword the offending commits on the branch (interactive rebase) before merging |
+| `commitlint` rejects a commit message | Reword the commit (`git commit --amend` / interactive rebase); never use `--no-verify` |
 | semantic-release `EGITNOPERMISSION` / GitHub 403 | `github` context `GITHUB_TOKEN` needs `contents:write` and this repo in scope |
 | Tag pushed but npm publish failed | Delete that `v*` tag (and its GitHub Release if created), then rerun the pipeline |
 | `ENEEDAUTH` on publish | npm Trusted Publisher (CircleCI) registration: Org/Project/Pipeline-definition IDs and Context IDs (`npm-publish-guard`) |
