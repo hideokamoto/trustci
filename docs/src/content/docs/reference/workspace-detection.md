@@ -12,6 +12,11 @@ Patterns are read from the first of these that yields at least one pattern:
 If none of them yields a pattern, the root `package.json` is used as a
 single-package fallback.
 
+With `pnpm-workspace.yaml`, the root package is also included even when
+`packages:` does not list it, matching pnpm, which always treats the workspace
+root as part of the workspace. With `package.json` `workspaces` or
+`lerna.json`, the root is not added.
+
 ## Pattern syntax
 
 Patterns are relative to the repository root.

@@ -139,6 +139,15 @@ export function discoverPackages(root: string): DiscoverResult {
   const dirs = expandPatterns(root, patterns);
   const all: Pkg[] = [];
   const seen = new Set<string>();
+
+  // pnpm always treats the workspace root as a package, even when `packages:` does not list it
+  // (e.g. a publishable root next to private `examples/*` and `docs`). Keyed on the file rather
+  // than on `source`, so a pnpm-workspace.yaml without patterns still counts when another config
+  // (package.json `workspaces`, lerna.json) supplies them.
+  if (existsSync(path.join(root, "pnpm-workspace.yaml"))) {
+    dirs.unshift(path.resolve(root));
+  }
+
   for (const dir of dirs) {
     const pkg = readPkg(dir);
     if (pkg && !seen.has(pkg.name)) {

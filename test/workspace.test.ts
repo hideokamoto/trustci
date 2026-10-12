@@ -49,7 +49,8 @@ describe("discover + filter (pnpm monorepo)", () => {
   test("discovers all packages then excludes private", () => {
     buildMonorepo();
     const { all } = discoverPackages(root);
-    expect(all.map((p) => p.name).sort()).toEqual(["@scope/a", "@scope/b", "@scope/c"]);
+    // pnpm always treats the workspace root as a package; the private root is discovered but filtered out.
+    expect(all.map((p) => p.name).sort()).toEqual(["@scope/a", "@scope/b", "@scope/c", "root"]);
     const pub = filterPackages(all, [], []);
     expect(pub.map((p) => p.name).sort()).toEqual(["@scope/a", "@scope/c"]);
   });
@@ -59,6 +60,72 @@ describe("discover + filter (pnpm monorepo)", () => {
     const { all } = discoverPackages(root);
     expect(filterPackages(all, ["@scope/a"], []).map((p) => p.name)).toEqual(["@scope/a"]);
     expect(filterPackages(all, [], ["@scope/c"]).map((p) => p.name)).toEqual(["@scope/a"]);
+  });
+});
+
+describe("pnpm workspace root package", () => {
+  let root: string;
+  afterEach(() => root && rmSync(root, { recursive: true, force: true }));
+
+  function buildRootPackageRepo(rootJson: object): void {
+    root = mkdtempSync(path.join(tmpdir(), "trustci-ws-root-"));
+    // Same shape as hono-stripe: a publishable root, with packages: listing only private dirs.
+    writeFileSync(path.join(root, "pnpm-workspace.yaml"), `packages:\n  - examples/*\n  - docs\n`);
+    writeFileSync(path.join(root, "package.json"), JSON.stringify(rootJson));
+    makePkg(root, "examples/app", { name: "example-app", version: "0.0.0", private: true });
+    makePkg(root, "docs", { name: "docs", version: "0.0.0", private: true });
+  }
+
+  test("a public root package is discovered even when packages: does not list it", () => {
+    buildRootPackageRepo({ name: "hono-stripe", version: "0.1.0" });
+    const { all, source } = discoverPackages(root);
+    expect(source).toBe("pnpm-workspace.yaml");
+    expect(all.map((p) => p.name).sort()).toEqual(["docs", "example-app", "hono-stripe"]);
+    expect(filterPackages(all, [], []).map((p) => p.name)).toEqual(["hono-stripe"]);
+  });
+
+  test("a private root package is discovered but excluded by filterPackages", () => {
+    buildRootPackageRepo({ name: "monorepo-root", private: true });
+    const { all } = discoverPackages(root);
+    expect(all.map((p) => p.name)).toContain("monorepo-root");
+    expect(filterPackages(all, [], [])).toHaveLength(0);
+  });
+
+  test("the root is not duplicated when packages: also matches it", () => {
+    root = mkdtempSync(path.join(tmpdir(), "trustci-ws-root-dup-"));
+    writeFileSync(path.join(root, "pnpm-workspace.yaml"), `packages:\n  - "."\n  - "packages/*"\n`);
+    writeFileSync(path.join(root, "package.json"), JSON.stringify({ name: "dup-root", version: "1.0.0" }));
+    makePkg(root, "packages/a", { name: "@scope/a", version: "1.0.0" });
+    const names = discoverPackages(root).all.map((p) => p.name);
+    expect(names.filter((n) => n === "dup-root")).toHaveLength(1);
+  });
+
+  test("a root without a name is ignored", () => {
+    buildRootPackageRepo({ private: true });
+    expect(discoverPackages(root).all.map((p) => p.name).sort()).toEqual(["docs", "example-app"]);
+  });
+
+  test("the root is included when pnpm-workspace.yaml has no packages: but another config supplies the patterns", () => {
+    root = mkdtempSync(path.join(tmpdir(), "trustci-ws-root-nopat-"));
+    writeFileSync(path.join(root, "pnpm-workspace.yaml"), "packages: []\nallowBuilds:\n  esbuild: true\n");
+    writeFileSync(
+      path.join(root, "package.json"),
+      JSON.stringify({ name: "pub-root", version: "1.0.0", workspaces: ["pkgs/*"] }),
+    );
+    makePkg(root, "pkgs/a", { name: "@scope/a", version: "1.0.0" });
+    const { all, source } = discoverPackages(root);
+    expect(source).toBe("package.json (workspaces)");
+    expect(all.map((p) => p.name).sort()).toEqual(["@scope/a", "pub-root"]);
+  });
+
+  test("npm/yarn workspaces do not implicitly include the root", () => {
+    root = mkdtempSync(path.join(tmpdir(), "trustci-ws-root-npm-"));
+    writeFileSync(
+      path.join(root, "package.json"),
+      JSON.stringify({ name: "npm-root", version: "1.0.0", workspaces: ["pkgs/*"] }),
+    );
+    makePkg(root, "pkgs/a", { name: "@scope/a", version: "1.0.0" });
+    expect(discoverPackages(root).all.map((p) => p.name)).toEqual(["@scope/a"]);
   });
 });
 

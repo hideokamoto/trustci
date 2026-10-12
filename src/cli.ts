@@ -122,6 +122,9 @@ async function runTrust(parsed: Extract<ReturnType<typeof parseCliArgs>, { kind:
   const candidates = filterPackages(all, parsed.only, parsed.exclude);
   if (candidates.length === 0) {
     console.error(`No public packages matched (out of ${all.length} discovered via ${source}).`);
+    for (const pkg of all) {
+      console.error(`  - ${pkg.name}${pkg.private ? " (private)" : ""}`);
+    }
     return 1;
   }
 
