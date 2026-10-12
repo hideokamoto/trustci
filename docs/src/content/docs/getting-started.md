@@ -5,7 +5,7 @@ description: Requirements and first run of trustci.
 
 ## Requirements
 
-- **npm** 11.5.1 or later (for `npm trust`)
+- **npm** 11.15.0 or later (for `npm trust` with `--allow-publish` / `--allow-stage-publish`)
 - **Node** 22.14.0 or later
 
 trustci checks both versions before doing anything else. On a real run an older

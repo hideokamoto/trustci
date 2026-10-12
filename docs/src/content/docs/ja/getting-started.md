@@ -5,7 +5,7 @@ description: trustci の動作要件と最初の実行方法。
 
 ## 動作要件
 
-- **npm** 11.5.1 以上（`npm trust` を使うため）
+- **npm** 11.15.0 以上（`--allow-publish` / `--allow-stage-publish` 付きの `npm trust` を使うため）
 - **Node** 22.14.0 以上
 
 trustci は最初に両方のバージョンを確認します。本番実行では古いバージョンはエラーになり、

@@ -10,7 +10,7 @@ Setting up trusted publishing one package at a time is tedious in a monorepo.
 
 ## Requirements
 
-- **npm** 11.5.1 or later (for `npm trust`)
+- **npm** 11.15.0 or later (for `npm trust` with `--allow-publish` / `--allow-stage-publish`)
 - **Node** 22.14.0 or later
 
 ## Usage

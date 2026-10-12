@@ -66,7 +66,7 @@ Examples:
     --pipeline-definition-id <uuid> --vcs-origin github.com/me/repo --allow-publish
   trustci list
 
-Requires npm >= 11.5.1 and Node >= 22.14.0.
+Requires npm >= 11.15.0 and Node >= 22.14.0.
 Documentation: https://trustci.hidetaka.dev
 `;
 
