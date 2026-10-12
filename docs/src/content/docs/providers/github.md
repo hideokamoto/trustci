@@ -10,3 +10,11 @@ description: Register a GitHub Actions workflow as the trusted publisher.
 ```bash
 npx trustci --provider github --repo me/repo --file release.yml --allow-publish
 ```
+
+Each flag is passed to `npm trust github` as follows:
+
+| trustci | `npm trust github` |
+| --- | --- |
+| `--repo` | `--repository` |
+| `--file` | `--file` |
+| `--env` | `--environment` |

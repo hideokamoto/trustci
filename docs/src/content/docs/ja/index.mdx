@@ -1,0 +1,37 @@
+---
+title: trustci
+description: モノレポ内のすべての公開パッケージに npm Trusted Publisher を一括登録します。
+template: splash
+hero:
+  tagline: モノレポ内のすべての公開パッケージに、npm Trusted Publisher をコマンド 1 つで一括登録します。GitHub Actions、GitLab CI/CD、CircleCI に対応しています。
+  actions:
+    - text: はじめる
+      link: /ja/getting-started/
+      icon: right-arrow
+    - text: GitHub で見る
+      link: https://github.com/hideokamoto/trustci
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+<CardGrid>
+  <Card title="モノレポ全体をコマンド 1 つで" icon="rocket">
+    Trusted Publishing をパッケージごとに設定するのは手間がかかります。trustci は
+    ワークスペースを検出して公開パッケージをすべて見つけ、それぞれに適切な
+    `npm trust <provider> …` を実行します。
+  </Card>
+  <Card title="3 つの CI プロバイダー" icon="puzzle">
+    GitHub Actions、GitLab CI/CD、CircleCI に対応しています。CircleCI では、
+    指定されていない ID を CircleCI API で解決し、`--vcs-origin` を
+    `package.json` または git から推定します。
+  </Card>
+  <Card title="まずプレビュー" icon="magnifier">
+    `--dry-run` は何も実行せず `npm trust` コマンドを表示します。本番実行では
+    未公開のパッケージをスキップし、登録前に確認を求めます。
+  </Card>
+  <Card title="ランタイム依存ゼロ" icon="seti:npm">
+    `npx trustci` で実行できます。npm に同梱されている `npm trust` コマンドのラッパーです。
+  </Card>
+</CardGrid>
