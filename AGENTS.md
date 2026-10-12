@@ -18,6 +18,13 @@ configured in the repository's Settings → Pages (Source: GitHub Actions), with
 CNAME `trustci` → `hideokamoto.github.io`. Use `docs:` commits for site changes so they
 do not trigger an npm release.
 
+## Agent skill
+
+`skills/trustci/SKILL.md` (Agent Skills format, installed with
+`npx skills add hideokamoto/trustci`) describes the CLI for coding agents. Update it
+together with `--help`, `README.md` and `docs/` when flags or behavior change.
+`test/skill.test.ts` checks that its npm/Node minimums match `src/npm.ts`.
+
 ## Releases (automated — do not release manually)
 
 Every push to `main` triggers the CircleCI pipeline that uses

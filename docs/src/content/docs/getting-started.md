@@ -56,6 +56,18 @@ npx trustci list --dry-run  # print the npm trust list commands only
 
 Runs `npm trust list <package>` for each target.
 
+## Agent skill
+
+The repository ships an [Agent Skill](https://agentskills.io/) at
+[`skills/trustci/SKILL.md`](https://github.com/hideokamoto/trustci/blob/main/skills/trustci/SKILL.md)
+that teaches coding agents (Claude Code, Codex, Cursor, …) to run trustci safely:
+dry-run first, then a real run only after you confirm. Install it with the
+[`skills`](https://github.com/vercel-labs/skills) CLI:
+
+```bash
+npx skills add hideokamoto/trustci
+```
+
 ## Next steps
 
 - Provider-specific flags: [GitHub Actions](/providers/github/),

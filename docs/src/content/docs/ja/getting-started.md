@@ -54,6 +54,18 @@ npx trustci list --dry-run  # npm trust list コマンドを表示するだけ
 
 対象ごとに `npm trust list <package>` を実行します。
 
+## エージェントスキル
+
+リポジトリには [Agent Skill](https://agentskills.io/) を
+[`skills/trustci/SKILL.md`](https://github.com/hideokamoto/trustci/blob/main/skills/trustci/SKILL.md)
+として同梱しています。コーディングエージェント（Claude Code、Codex、Cursor など）に、
+まず `--dry-run` で確認し、利用者の承認後にだけ本実行するという trustci の使い方を教えるものです。
+[`skills`](https://github.com/vercel-labs/skills) CLI でインストールできます。
+
+```bash
+npx skills add hideokamoto/trustci
+```
+
 ## 次のステップ
 
 - プロバイダーごとのフラグ: [GitHub Actions](/ja/providers/github/)、
