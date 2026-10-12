@@ -24,10 +24,12 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
   </Card>
   <Card title="Three CI providers" icon="puzzle">
     GitHub Actions, GitLab CI/CD and CircleCI. For CircleCI, missing IDs are
-    resolved through the CircleCI API.
+    resolved through the CircleCI API and `--vcs-origin` is inferred from
+    `package.json` or git.
   </Card>
   <Card title="Preview first" icon="magnifier">
-    `--dry-run` prints the `npm trust` commands without running anything.
+    `--dry-run` prints the `npm trust` commands without running anything. Real
+    runs skip unpublished packages and ask before registering.
   </Card>
   <Card title="Zero runtime dependencies" icon="seti:npm">
     Run it with `npx trustci`. It wraps the `npm trust` command shipped with npm.

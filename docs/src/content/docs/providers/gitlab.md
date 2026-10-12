@@ -12,3 +12,11 @@ description: Register a GitLab CI/CD pipeline as the trusted publisher.
 ```bash
 npx trustci --provider gitlab --project me/repo --file .gitlab-ci.yml --allow-publish -y
 ```
+
+Each flag is passed to `npm trust gitlab` as follows:
+
+| trustci | `npm trust gitlab` |
+| --- | --- |
+| `--project` / `--repo` | `--project` |
+| `--file` | `--file` |
+| `--env` | `--environment` |
