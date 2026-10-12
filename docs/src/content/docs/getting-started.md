@@ -68,6 +68,10 @@ dry-run first, then a real run only after you confirm. Install it with the
 npx skills add hideokamoto/trustci
 ```
 
+This site also serves it over HTTP at [`/skill.md`](/skill.md), listed in the
+[Agent Skills discovery index](/.well-known/agent-skills/index.json), and an
+[`llms.txt`](/llms.txt) for the whole documentation.
+
 ## Next steps
 
 - Provider-specific flags: [GitHub Actions](/providers/github/),

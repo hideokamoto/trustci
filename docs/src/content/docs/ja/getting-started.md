@@ -66,6 +66,10 @@ npx trustci list --dry-run  # npm trust list コマンドを表示するだけ
 npx skills add hideokamoto/trustci
 ```
 
+このサイトでも HTTP で [`/skill.md`](/skill.md) として配信し、
+[Agent Skills の検出用インデックス](/.well-known/agent-skills/index.json)に載せています。
+ドキュメント全体の [`llms.txt`](/llms.txt) もあります。
+
 ## 次のステップ
 
 - プロバイダーごとのフラグ: [GitHub Actions](/ja/providers/github/)、
