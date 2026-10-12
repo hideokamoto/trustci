@@ -128,6 +128,15 @@ bun run typecheck
 bun run build   # -> dist/cli.js (npx entry point), via `bun build --target node`
 ```
 
+The documentation site lives in `docs/` ([Astro Starlight](https://starlight.astro.build/)):
+
+```bash
+cd docs
+bun install
+bun run dev     # local preview
+bun run build   # -> docs/dist
+```
+
 `bun install` also enables a husky `commit-msg` hook that runs
 [commitlint](https://commitlint.js.org/) with `@commitlint/config-conventional`,
 so every commit must be a [Conventional Commit](https://www.conventionalcommits.org/).
