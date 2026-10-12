@@ -105,6 +105,19 @@ describe("pnpm workspace root package", () => {
     expect(discoverPackages(root).all.map((p) => p.name).sort()).toEqual(["docs", "example-app"]);
   });
 
+  test("the root is included when pnpm-workspace.yaml has no packages: but another config supplies the patterns", () => {
+    root = mkdtempSync(path.join(tmpdir(), "trustci-ws-root-nopat-"));
+    writeFileSync(path.join(root, "pnpm-workspace.yaml"), "packages: []\nallowBuilds:\n  esbuild: true\n");
+    writeFileSync(
+      path.join(root, "package.json"),
+      JSON.stringify({ name: "pub-root", version: "1.0.0", workspaces: ["pkgs/*"] }),
+    );
+    makePkg(root, "pkgs/a", { name: "@scope/a", version: "1.0.0" });
+    const { all, source } = discoverPackages(root);
+    expect(source).toBe("package.json (workspaces)");
+    expect(all.map((p) => p.name).sort()).toEqual(["@scope/a", "pub-root"]);
+  });
+
   test("npm/yarn workspaces do not implicitly include the root", () => {
     root = mkdtempSync(path.join(tmpdir(), "trustci-ws-root-npm-"));
     writeFileSync(
