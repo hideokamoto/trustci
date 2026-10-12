@@ -139,6 +139,13 @@ export function discoverPackages(root: string): DiscoverResult {
   const dirs = expandPatterns(root, patterns);
   const all: Pkg[] = [];
   const seen = new Set<string>();
+
+  // pnpm always treats the workspace root as a package, even when `packages:` does not list it
+  // (e.g. a publishable root next to private `examples/*` and `docs`).
+  if (source === "pnpm-workspace.yaml") {
+    dirs.unshift(path.resolve(root));
+  }
+
   for (const dir of dirs) {
     const pkg = readPkg(dir);
     if (pkg && !seen.has(pkg.name)) {
