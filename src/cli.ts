@@ -17,6 +17,11 @@ Usage:
   trustci [trust] --provider <github|gitlab|circleci> [provider flags] [options]
   trustci list [package] [--dry-run]
 
+Commands:
+  trust      register a trusted publisher for every public workspace package
+             (the default; "trust" may be omitted)
+  list       run \`npm trust list\` for <package>, or for every public workspace package
+
 Providers:
   github     --repo <owner/repo> --file <workflow> [--env <name>]
   gitlab     --project <group/project> --file <workflow> [--env <name>]
@@ -26,34 +31,43 @@ Providers:
              [--context-id <uuid> ...]
              --vcs-origin defaults to the root package.json "repository", then
              \`git remote get-url origin\`.
-             Missing UUIDs are resolved via CircleCI API v2 using a token from
-             --circle-token, $CIRCLE_TOKEN, $CIRCLECI_TOKEN, $CIRCLE_CLI_TOKEN,
-             $CIRCLECI_CLI_TOKEN, or ~/.circleci/cli.yml (in that order).
+             Missing UUIDs are resolved via CircleCI API v2 (also under --dry-run)
+             using a token from --circle-token, $CIRCLE_TOKEN, $CIRCLECI_TOKEN,
+             $CIRCLE_CLI_TOKEN, $CIRCLECI_CLI_TOKEN, or ~/.circleci/cli.yml (in that order).
              Explicit UUIDs override auto-resolution; with all three, no token is needed.
+             --file selects the pipeline definition by config path or name (needed
+             when the project has more than one); it is not passed to npm trust.
 
 Permissions (at least one required):
   --allow-publish           allow npm publish
   --allow-stage-publish     allow npm stage publish
 
 Options:
-  --dry-run                 print the npm trust commands without executing them
+  --dry-run                 print the npm commands without executing them
   --only <name-glob>        only include packages matching (repeatable)
   --exclude <name-glob>     exclude packages matching (repeatable)
-  -y, --yes                 skip the confirmation prompt (and npm's)
+                            globs match the whole name; * also matches "/"
+  -y, --yes                 skip the confirmation prompt (and npm's);
+                            required when stdin is not a terminal
   -h, --help                show this help
   -v, --version             show the trustci version
 
 Workspaces are detected from pnpm-workspace.yaml, package.json "workspaces",
 or lerna.json. If no workspace config is found, the root package.json is used
 as a single-package fallback. Private packages (\"private\": true) are always excluded.
+On a real run, packages not yet published to the registry are skipped.
 
 Examples:
   trustci --dry-run --provider github --repo me/repo --file release.yml --allow-publish
   trustci --provider gitlab --project me/repo --file .gitlab-ci.yml --allow-publish -y
   CIRCLE_TOKEN=... trustci --provider circleci --allow-publish
+  trustci --provider circleci --file .circleci/config.yml --allow-publish
   trustci --provider circleci --org-id <uuid> --project-id <uuid> \\
     --pipeline-definition-id <uuid> --vcs-origin github.com/me/repo --allow-publish
   trustci list
+
+Requires npm >= 11.5.1 and Node >= 22.14.0.
+Documentation: https://trustci.hidetaka.dev
 `;
 
 /** Prompt the user for a yes/no answer on the terminal. */
