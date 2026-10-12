@@ -7,6 +7,10 @@ description: Register a CircleCI pipeline as the trusted publisher.
 | --- | --- |
 | Either all of `--org-id` `--project-id` `--pipeline-definition-id`, or a CircleCI token | `--vcs-origin <host/owner/repo>`, `--circle-token`, `--file`, `--context-id` (repeatable) |
 
+When `--pipeline-definition-id` is resolved through the API, `--file` selects the
+pipeline definition by its config file path or name. It can be omitted only when the
+project has exactly one pipeline definition; with several, trustci stops and lists them.
+
 ```bash
 # vcs-origin is host/owner/repo; a leading https:// is stripped automatically
 npx trustci --provider circleci \
