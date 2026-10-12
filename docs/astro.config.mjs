@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import starlightLlmsTxt from "starlight-llms-txt";
 
 // Served from a custom domain on GitHub Pages, so no `base` is set.
 export default defineConfig({
@@ -16,6 +17,18 @@ export default defineConfig({
         root: { label: "English", lang: "en" },
         ja: { label: "日本語", lang: "ja" },
       },
+      // llms.txt v2: point every page at the llms.txt that covers it.
+      head: [{ tag: "link", attrs: { rel: "describedby", href: "/llms.txt" } }],
+      plugins: [
+        starlightLlmsTxt({
+          details: [
+            "An Agent Skill for running trustci is published at",
+            "[/skill.md](https://trustci.hidetaka.dev/skill.md) and listed in",
+            "[/.well-known/agent-skills/index.json](https://trustci.hidetaka.dev/.well-known/agent-skills/index.json).",
+            "Install it with `npx skills add hideokamoto/trustci`.",
+          ].join(" "),
+        }),
+      ],
       social: [
         { icon: "github", label: "GitHub", href: "https://github.com/hideokamoto/trustci" },
       ],

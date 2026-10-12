@@ -7,6 +7,8 @@ on:
     branches: [main]
     paths:
       - "docs/**"
+      # The site serves skills/trustci/SKILL.md at /skill.md and /.well-known/agent-skills/.
+      - "skills/**"
       - ".github/workflows/deploy-docs.yml"
   workflow_dispatch:
 

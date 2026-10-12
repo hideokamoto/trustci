@@ -10,7 +10,7 @@ Setting up trusted publishing one package at a time is tedious in a monorepo.
 
 ## Requirements
 
-- **npm** 11.5.1 or later (for `npm trust`)
+- **npm** 11.15.0 or later (for `npm trust` with `--allow-publish` / `--allow-stage-publish`)
 - **Node** 22.14.0 or later
 
 ## Usage
@@ -115,6 +115,18 @@ Patterns are read from the first of:
 
 Packages marked `"private": true` are always excluded. On a real (non-dry) run,
 packages not yet published to the registry are skipped with a warning.
+
+## Agent skill
+
+The repository ships an [Agent Skill](https://agentskills.io/) at
+[`skills/trustci/SKILL.md`](https://github.com/hideokamoto/trustci/blob/main/skills/trustci/SKILL.md)
+that teaches coding agents (Claude Code, Codex, Cursor, …) to run trustci safely:
+dry-run first, then a real run only after you confirm. Install it with the
+[`skills`](https://github.com/vercel-labs/skills) CLI:
+
+```bash
+npx skills add hideokamoto/trustci
+```
 
 ## Development
 

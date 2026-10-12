@@ -5,7 +5,7 @@ description: Requirements and first run of trustci.
 
 ## Requirements
 
-- **npm** 11.5.1 or later (for `npm trust`)
+- **npm** 11.15.0 or later (for `npm trust` with `--allow-publish` / `--allow-stage-publish`)
 - **Node** 22.14.0 or later
 
 trustci checks both versions before doing anything else. On a real run an older
@@ -55,6 +55,22 @@ npx trustci list --dry-run  # print the npm trust list commands only
 ```
 
 Runs `npm trust list <package>` for each target.
+
+## Agent skill
+
+The repository ships an [Agent Skill](https://agentskills.io/) at
+[`skills/trustci/SKILL.md`](https://github.com/hideokamoto/trustci/blob/main/skills/trustci/SKILL.md)
+that teaches coding agents (Claude Code, Codex, Cursor, …) to run trustci safely:
+dry-run first, then a real run only after you confirm. Install it with the
+[`skills`](https://github.com/vercel-labs/skills) CLI:
+
+```bash
+npx skills add hideokamoto/trustci
+```
+
+This site also serves it over HTTP at [`/skill.md`](/skill.md), listed in the
+[Agent Skills discovery index](/.well-known/agent-skills/index.json), and an
+[`llms.txt`](/llms.txt) for the whole documentation.
 
 ## Next steps
 

@@ -2,7 +2,7 @@ import { run } from "./exec.ts";
 import type { CommonOptions, ProviderOptions } from "./types.ts";
 
 export const MIN_NODE = "22.14.0";
-export const MIN_NPM = "11.5.1";
+export const MIN_NPM = "11.15.0";
 
 /** Compare dotted version strings. Returns -1, 0, or 1. */
 export function cmpVersion(a: string, b: string): number {

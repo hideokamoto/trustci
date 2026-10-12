@@ -12,11 +12,24 @@
 ## Documentation site
 
 `docs/` is deployed to GitHub Pages at https://trustci.hidetaka.dev by
-`.github/workflows/deploy-docs.yml` on pushes to `main` that touch `docs/`. This is the
+`.github/workflows/deploy-docs.yml` on pushes to `main` that touch `docs/` or `skills/`. This is the
 only GitHub Actions workflow; tests and releases stay on CircleCI. The custom domain is
 configured in the repository's Settings → Pages (Source: GitHub Actions), with a DNS
 CNAME `trustci` → `hideokamoto.github.io`. Use `docs:` commits for site changes so they
 do not trigger an npm release.
+
+## Agent skill
+
+`skills/trustci/SKILL.md` (Agent Skills format, installed with
+`npx skills add hideokamoto/trustci`) describes the CLI for coding agents. Update it
+together with `--help`, `README.md` and `docs/` when flags or behavior change.
+`test/skill.test.ts` checks that its npm/Node minimums match `src/npm.ts`.
+
+The docs site serves the same file (read at build time, never copied) at `/skill.md`
+and `/.well-known/agent-skills/trustci/SKILL.md`, with a discovery index at
+`/.well-known/agent-skills/index.json` (`docs/src/pages/`, `docs/src/lib/skill.ts`).
+`starlight-llms-txt` generates `/llms.txt`, `/llms-full.txt` and `/llms-small.txt`,
+and every page links to `/llms.txt` with `<link rel="describedby">`.
 
 ## Releases (automated — do not release manually)
 

@@ -5,7 +5,7 @@ description: trustci の動作要件と最初の実行方法。
 
 ## 動作要件
 
-- **npm** 11.5.1 以上（`npm trust` を使うため）
+- **npm** 11.15.0 以上（`--allow-publish` / `--allow-stage-publish` 付きの `npm trust` を使うため）
 - **Node** 22.14.0 以上
 
 trustci は最初に両方のバージョンを確認します。本番実行では古いバージョンはエラーになり、
@@ -53,6 +53,22 @@ npx trustci list --dry-run  # npm trust list コマンドを表示するだけ
 ```
 
 対象ごとに `npm trust list <package>` を実行します。
+
+## エージェントスキル
+
+リポジトリには [Agent Skill](https://agentskills.io/) を
+[`skills/trustci/SKILL.md`](https://github.com/hideokamoto/trustci/blob/main/skills/trustci/SKILL.md)
+として同梱しています。コーディングエージェント（Claude Code、Codex、Cursor など）に、
+まず `--dry-run` で確認し、利用者の承認後にだけ本実行するという trustci の使い方を教えるものです。
+[`skills`](https://github.com/vercel-labs/skills) CLI でインストールできます。
+
+```bash
+npx skills add hideokamoto/trustci
+```
+
+このサイトでも HTTP で [`/skill.md`](/skill.md) として配信し、
+[Agent Skills の検出用インデックス](/.well-known/agent-skills/index.json)に載せています。
+ドキュメント全体の [`llms.txt`](/llms.txt) もあります。
 
 ## 次のステップ
 
