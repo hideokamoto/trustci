@@ -23,7 +23,7 @@ At least one is required. Both are passed through to `npm trust`.
 
 | Flag | Description |
 | --- | --- |
-| `--dry-run` | Print the `npm trust` commands without executing. Also works with `list`. |
+| `--dry-run` | Print the `npm trust` commands without executing, then the `trustci` command for the real run (the flags you passed, without `--dry-run`, plus `-y`; `trust` only). Also works with `list`. |
 | `--only <name-glob>` | Only include packages whose name matches (repeatable). |
 | `--exclude <name-glob>` | Exclude packages whose name matches (repeatable). |
 | `-y`, `--yes` | Skip the confirmation prompt, and pass `-y` to `npm trust` to skip npm's. Required when stdin is not a terminal. |

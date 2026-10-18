@@ -112,3 +112,30 @@ function shellQuote(s: string): string {
 export function displayCommand(args: string[]): string {
   return ["npm", ...args].map(shellQuote).join(" ");
 }
+
+/**
+ * Render the trustci command that performs the real run after a --dry-run: the
+ * flags the user passed, minus --dry-run, plus -y. Values trustci resolved on its
+ * own (CircleCI UUIDs, --vcs-origin) stay out, so they are resolved again rather
+ * than copied. --circle-token is dropped so the token is never printed.
+ */
+export function realRunCommand(argv: string[], yes: boolean): { command: string; tokenOmitted: boolean } {
+  const out: string[] = [];
+  let tokenOmitted = false;
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i]!;
+    if (a === "--dry-run") continue;
+    if (a === "--circle-token") {
+      tokenOmitted = true;
+      i++;
+      continue;
+    }
+    if (a.startsWith("--circle-token=")) {
+      tokenOmitted = true;
+      continue;
+    }
+    out.push(a);
+  }
+  if (!yes) out.push("-y");
+  return { command: ["npx", "trustci", ...out].map(shellQuote).join(" "), tokenOmitted };
+}

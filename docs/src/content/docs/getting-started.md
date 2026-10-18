@@ -38,7 +38,11 @@ At least one of `--allow-publish` / `--allow-stage-publish` is required.
 1. Finds the workspace packages and drops private ones and those filtered out by
    `--only` / `--exclude` (see [Workspace detection](/reference/workspace-detection/)).
 2. With `--dry-run`, prints one `npm trust <provider> <package> …` command per
-   package and stops. The registry is not checked and nothing is executed.
+   package and stops. The registry is not checked and nothing is executed. The
+   last line is the `trustci` command for the real run: the flags you passed,
+   without `--dry-run`, plus `-y`. Values trustci resolved itself (CircleCI UUIDs,
+   `--vcs-origin`) are left out and resolved again, and `--circle-token` is
+   dropped so the token is never printed.
 3. Otherwise, checks each package with `npm view <package> version`. Packages that
    are not published yet (registry 404) are skipped with a warning. Any other
    registry error stops the run.

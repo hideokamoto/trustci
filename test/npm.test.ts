@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { parseCliArgs } from "../src/args.ts";
-import { buildTrustArgs, cmpVersion, displayCommand } from "../src/npm.ts";
+import { buildTrustArgs, cmpVersion, displayCommand, realRunCommand } from "../src/npm.ts";
 import type { CircleciOptions, GithubOptions, GitlabOptions } from "../src/types.ts";
 
 describe("cmpVersion", () => {
@@ -109,5 +109,41 @@ describe("displayCommand", () => {
   });
   test("quotes args with spaces", () => {
     expect(displayCommand(["trust", "list", "my pkg"])).toBe("npm trust list 'my pkg'");
+  });
+});
+
+describe("realRunCommand", () => {
+  test("drops --dry-run and adds -y, keeping the flags the user passed", () => {
+    expect(realRunCommand(["--dry-run", "--provider", "circleci", "--allow-publish"], false)).toEqual({
+      command: "npx trustci --provider circleci --allow-publish -y",
+      tokenOmitted: false,
+    });
+  });
+
+  test("does not add -y twice", () => {
+    expect(realRunCommand(["--provider", "circleci", "--allow-publish", "--dry-run", "-y"], true).command).toBe(
+      "npx trustci --provider circleci --allow-publish -y",
+    );
+  });
+
+  test("leaves --circle-token out in both spellings", () => {
+    for (const argv of [
+      ["--provider", "circleci", "--circle-token", "secret", "--allow-publish", "--dry-run"],
+      ["--provider", "circleci", "--circle-token=secret", "--allow-publish", "--dry-run"],
+    ]) {
+      const r = realRunCommand(argv, false);
+      expect(r.command).toBe("npx trustci --provider circleci --allow-publish -y");
+      expect(r.command).not.toContain("secret");
+      expect(r.tokenOmitted).toBe(true);
+    }
+  });
+
+  test("quotes globs and keeps repeatable flags", () => {
+    expect(
+      realRunCommand(
+        ["trust", "--provider", "circleci", "--only", "@scope/*", "--context-id", "c1", "--context-id", "c2", "--allow-publish", "--dry-run"],
+        false,
+      ).command,
+    ).toBe("npx trustci trust --provider circleci --only '@scope/*' --context-id c1 --context-id c2 --allow-publish -y");
   });
 });

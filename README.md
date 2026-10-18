@@ -98,7 +98,7 @@ it has no effect when `--pipeline-definition-id` is given explicitly.
 
 | Flag                     | Description                                          |
 | ------------------------ | --------------------------------------------------- |
-| `--dry-run`              | Print the `npm trust` commands without executing.   |
+| `--dry-run`              | Print the `npm trust` commands without executing, then the `trustci` command for the real run (the flags you passed, without `--dry-run`, plus `-y`). |
 | `--only <name-glob>`     | Only include packages matching (repeatable).        |
 | `--exclude <name-glob>`  | Exclude packages matching (repeatable).             |
 | `-y`, `--yes`            | Skip the confirmation prompt (and npm's).           |

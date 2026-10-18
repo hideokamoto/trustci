@@ -47,7 +47,11 @@ trustci finds every public package in the workspace and runs
 
    Narrow the targets with `--only '<glob>'` / `--exclude '<glob>'` (repeatable,
    matched against the whole package name, `*` also matches `/`; quote them).
-4. After the user confirms, run the same command without `--dry-run` and with `-y`.
+4. After the user confirms, run the command printed on the last line of the dry-run
+   output (`# To register, run …`), or hand it to the user when they have to run it
+   (e.g. for 2FA). It is the flags you passed, without `--dry-run`, plus `-y`. Do
+   not copy UUIDs or `--vcs-origin` from the `npm trust` lines into it: trustci
+   resolves them again. `--circle-token` is left out; never add the token back.
    Packages not yet published to the registry are skipped with a warning (npm can
    only configure packages that already exist); report them to the user.
 5. Verify with `npx trustci list` (every public package) or

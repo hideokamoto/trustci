@@ -36,3 +36,25 @@ describe("trustci with no publishable packages", () => {
     }
   });
 });
+
+describe("trustci --dry-run", () => {
+  test("ends with the trustci command that performs the real run", () => {
+    const dir = mkdtempSync(join(tmpdir(), "trustci-cli-"));
+    try {
+      writeFileSync(join(dir, "package.json"), JSON.stringify({ name: "solo-pkg" }));
+      const r = spawnSync(
+        process.execPath,
+        [join(root, "src/cli.ts"), "--dry-run", "--provider", "github", "--repo", "me/repo", "--file", "release.yml", "--allow-publish"],
+        { cwd: dir, encoding: "utf8" },
+      );
+      expect(r.status).toBe(0);
+      expect(r.stdout).toContain("npm trust github solo-pkg --repository me/repo --file release.yml --allow-publish");
+      expect(r.stdout.trimEnd().split("\n").slice(-2)).toEqual([
+        "# To register, run (flags as given, without --dry-run):",
+        "npx trustci --provider github --repo me/repo --file release.yml --allow-publish -y",
+      ]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
