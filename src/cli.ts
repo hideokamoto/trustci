@@ -4,7 +4,7 @@ import { createInterface } from "node:readline/promises";
 import { ArgError, parseCliArgs } from "./args.ts";
 import { runInherit } from "./exec.ts";
 import { resolveCircleciOptions } from "./resolve.ts";
-import { buildTrustArgs, checkVersions, displayCommand, isPublished } from "./npm.ts";
+import { buildTrustArgs, checkVersions, displayCommand, isPublished, realRunCommand } from "./npm.ts";
 import type { Pkg } from "./types.ts";
 import { discoverPackages, filterPackages } from "./workspace.ts";
 import { version as pkgVersion } from "../package.json" with { type: "json" };
@@ -43,7 +43,9 @@ Permissions (at least one required):
   --allow-stage-publish     allow npm stage publish
 
 Options:
-  --dry-run                 print the npm commands without executing them
+  --dry-run                 print the npm commands without executing them, then the
+                            trustci command for the real run (trust only; your
+                            flags, -y added)
   --only <name-glob>        only include packages matching (repeatable)
   --exclude <name-glob>     exclude packages matching (repeatable)
                             globs match the whole name; * also matches "/"
@@ -112,7 +114,10 @@ async function runList(pkg: string | undefined, dryRun: boolean): Promise<number
  * Discover and filter workspace packages, then register each with the provider
  * (or print the commands under --dry-run).
  */
-async function runTrust(parsed: Extract<ReturnType<typeof parseCliArgs>, { kind: "trust" }>): Promise<number> {
+async function runTrust(
+  parsed: Extract<ReturnType<typeof parseCliArgs>, { kind: "trust" }>,
+  argv: string[],
+): Promise<number> {
   const root = process.cwd();
   const { all, source } = discoverPackages(root);
   if (all.length === 0) {
@@ -140,6 +145,11 @@ async function runTrust(parsed: Extract<ReturnType<typeof parseCliArgs>, { kind:
       console.log(displayCommand(buildTrustArgs(parsed.options, pkg.name)));
     }
     console.error("\n(dry run — registry publish-state was not checked and nothing was executed)");
+    const real = realRunCommand(argv, parsed.options.yes);
+    console.log(`\n# To register, run (flags as given, without --dry-run):\n${real.command}`);
+    if (real.tokenOmitted) {
+      console.error("note: --circle-token is left out of that command; pass it again or set CIRCLE_TOKEN.");
+    }
     return 0;
   }
 
@@ -194,9 +204,10 @@ async function runTrust(parsed: Extract<ReturnType<typeof parseCliArgs>, { kind:
 
 /** Parse argv, run version guards, and dispatch to the right subcommand. */
 async function main(): Promise<number> {
+  const argv = process.argv.slice(2);
   let parsed: ReturnType<typeof parseCliArgs>;
   try {
-    parsed = parseCliArgs(process.argv.slice(2));
+    parsed = parseCliArgs(argv);
   } catch (err) {
     if (err instanceof ArgError) {
       console.error(`error: ${err.message}\n`);
@@ -236,7 +247,7 @@ async function main(): Promise<number> {
     return 1;
   }
 
-  return runTrust(parsed);
+  return runTrust(parsed, argv);
 }
 
 main().then(
