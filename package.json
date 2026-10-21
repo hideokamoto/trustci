@@ -45,10 +45,11 @@
     "url": "https://github.com/hideokamoto/trustci/issues"
   },
   "license": "MIT",
+  "packageManager": "bun@1.4.2",
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",
     "@commitlint/config-conventional": "^21.2.3",
-    "@types/bun": "latest",
+    "@types/bun": "1.4.2",
     "husky": "^9.1.7",
     "typescript": "^5"
   }

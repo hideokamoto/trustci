@@ -140,6 +140,10 @@ bun run typecheck
 bun run build   # -> dist/cli.js (npx entry point), via `bun build --target node`
 ```
 
+Optionally, `nix develop` (flakes enabled) opens a shell with the pinned Bun and
+Node 24 (bundling npm 11, which `trustci` requires) from `flake.lock`. Bun's version
+is also declared in `package.json` `packageManager`.
+
 The documentation site lives in `docs/` ([Astro Starlight](https://starlight.astro.build/)):
 
 ```bash

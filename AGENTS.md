@@ -2,6 +2,9 @@
 
 ## Commands
 
+- `nix develop` — optional shell with the toolchain pinned by `flake.lock` (Node 24 for
+  npm >= `MIN_NPM`, and Bun); keep `flake.nix`'s Bun in step with `package.json`
+  `packageManager` and `@types/bun`. CI does not use it
 - `bun install` — install dependencies (also enables the husky `commit-msg` hook)
 - `bun run typecheck` — `tsc --noEmit`
 - `bun test` — unit tests
